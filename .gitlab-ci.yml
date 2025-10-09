@@ -1,0 +1,53 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  NODE_VERSION: "20-alpine"
+
+# Cache dependencies for faster builds
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store
+    - node_modules
+
+# Build the application (install + build in one job)
+build:
+  stage: build
+  image: node:${NODE_VERSION}
+  before_script:
+    - npm install -g pnpm
+    - pnpm config set store-dir .pnpm-store
+    - pnpm config set fetch-timeout 600000
+  script:
+    - pnpm install --frozen-lockfile --prefer-offline
+    - pnpm build
+  artifacts:
+    paths:
+      - .next/
+      - public/
+    expire_in: "30 minutes"
+  only:
+    - main
+    - merge_requests
+
+# Deploy to Vercel
+deploy_to_vercel:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g vercel pnpm
+    - pnpm config set store-dir .pnpm-store
+    - pnpm config set fetch-timeout 600000
+  script:
+    - vercel --prod --yes --token $VERCEL_TOKEN
+  environment:
+    name: production
+    url: https://$CI_PROJECT_NAME.vercel.app
+  only:
+    - main

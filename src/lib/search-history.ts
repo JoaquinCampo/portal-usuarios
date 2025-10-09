@@ -27,7 +27,6 @@ export function addToSearchHistory(entity: EntityType, term: string): void {
   try {
     const history = getSearchHistory();
 
-    // Create new search history item
     const newItem: SearchHistory = {
       id: `${entity}-${term}-${Date.now()}`,
       entity,
@@ -35,15 +34,12 @@ export function addToSearchHistory(entity: EntityType, term: string): void {
       timestamp: new Date(),
     };
 
-    // Remove any existing identical searches (same entity and term)
     const filteredHistory = history.filter(
       (item) => !(item.entity === entity && item.term === term)
     );
 
-    // Add new item at the beginning
     const updatedHistory = [newItem, ...filteredHistory];
 
-    // Limit to MAX_HISTORY_ITEMS
     const limitedHistory = updatedHistory.slice(0, MAX_HISTORY_ITEMS);
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(limitedHistory));

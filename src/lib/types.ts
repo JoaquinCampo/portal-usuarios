@@ -24,11 +24,11 @@ export interface HealthUser {
   gender?: Gender;
   email?: string;
   phone?: string;
-  dateOfBirth?: string; // ISO date string
+  dateOfBirth?: string;
   imageUrl?: string;
   address?: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
   clinicalHistoryId?: string;
   clinicIds?: string[];
 }
@@ -42,11 +42,11 @@ export interface HealthWorker {
   gender?: Gender;
   email?: string;
   phone?: string;
-  dateOfBirth?: string; // ISO date string
+  dateOfBirth?: string;
   imageUrl?: string;
   address?: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
   licenseNumber?: string;
   clinicIds?: string[];
   specialtyIds?: string[];
@@ -62,16 +62,16 @@ export interface Clinic {
   address?: string;
   domain?: string;
   type?: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ClinicalDocument {
   id: string;
   title?: string;
   contentUrl?: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  createdAt: string;
+  updatedAt: string;
   clinicalHistoryId?: string;
   healthWorkerIds?: string[];
 }

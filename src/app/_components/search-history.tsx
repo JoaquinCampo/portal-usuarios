@@ -39,7 +39,7 @@ export function SearchHistoryComponent({
   useEffect(() => {
     if (mounted) {
       setHistory(getSearchHistory());
-      setCurrentPage(0); // Reset to first page on new search
+      setCurrentPage(0);
     }
   }, [entity, query, mounted]);
 

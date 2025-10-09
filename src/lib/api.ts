@@ -7,8 +7,8 @@ import type {
 } from "./types";
 
 function getAuthHeaders(): Record<string, string> {
-  const username = process.env.NEXT_PUBLIC_ADMIN_USERNAME || "admin";
-  const password = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "admin";
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
   const credentials = btoa(`${username}:${password}`);
 
   return {

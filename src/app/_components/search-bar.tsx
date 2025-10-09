@@ -29,12 +29,10 @@ export function SearchBar({ isLoading }: SearchBarProps) {
 
   const [localValue, setLocalValue] = useState<string>(q);
 
-  // Sync local value with query param
   useEffect(() => {
     setLocalValue(q);
   }, [q]);
 
-  // Store search history when search parameters change
   useEffect(() => {
     if (typeof window === "undefined") return;
 
