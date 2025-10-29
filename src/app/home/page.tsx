@@ -1,5 +1,4 @@
-import { Search, Bell, FileText } from "lucide-react";
-import { History, ShieldCheck } from "lucide-react";
+import { Bell, FileText, History, ShieldCheck } from "lucide-react";
 import { AppHeader } from "@/app/_components/app-header";
 import { OptionCard } from "./_components/option-card";
 
@@ -10,14 +9,6 @@ export default function HomePage() {
 
       <main className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 gap-6">
-          <OptionCard
-            title="Búsqueda"
-            description="Explorá usuarios, trabajadores, clínicas y documentos."
-            href="/search"
-            ctaLabel="Búsqueda"
-            icon={<Search className="h-4 w-4" />}
-          />
-
           <OptionCard
             title="Gestión de notificaciones"
             description="Activá o desactivá el envío de notificaciones."

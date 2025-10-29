@@ -17,28 +17,24 @@ export default function AccessPoliciesPage() {
       name: "Sofía Martínez",
       clinic: "Clínica Central",
       specialty: "Cardiología",
-      documentTitle: "Electrocardiograma",
     },
     {
       ci: "1.234.567-0",
       name: "Diego López",
       clinic: "Sanatorio del Este",
       specialty: "Neurología",
-      documentTitle: "Resonancia magnética",
     },
     {
       ci: "6.543.210-9",
       name: "Valentina Silva",
       clinic: "Hospital Norte",
       specialty: "Traumatología",
-      documentTitle: "Informe de RX de hombro",
     },
     {
       ci: "8.765.432-1",
       name: "Matías Romero",
       clinic: "Policlínica Sur",
       specialty: "Dermatología",
-      documentTitle: "Biopsia de piel",
     },
   ];
 
@@ -53,7 +49,6 @@ export default function AccessPoliciesPage() {
               <TableHead>Nombre</TableHead>
               <TableHead>Clínica</TableHead>
               <TableHead>Especialidad</TableHead>
-              <TableHead>Documento</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -64,7 +59,6 @@ export default function AccessPoliciesPage() {
                 <TableCell className="text-white">{r.name}</TableCell>
                 <TableCell className="text-white">{r.clinic}</TableCell>
                 <TableCell className="text-white">{r.specialty}</TableCell>
-                <TableCell className="text-white">{r.documentTitle}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button size="sm">Aceptar</Button>

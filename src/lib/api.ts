@@ -1,10 +1,4 @@
-import type {
-  EntityType,
-  HealthUser,
-  HealthWorker,
-  Clinic,
-  ClinicalDocument,
-} from "./types";
+import type { HealthUser, HealthWorker, Clinic, ClinicalDocument } from "./types";
 
 function getAuthHeaders(): Record<string, string> {
   const username = process.env.ADMIN_USERNAME;
@@ -40,27 +34,7 @@ export async function getAllClinics(): Promise<Clinic[]> {
   }
 }
 
-export async function searchClinics(query: string): Promise<Clinic[]> {
-  const apiUrl = getApiUrl();
-
-  try {
-    const res = await fetch(
-      `${apiUrl}/clinics/search?name=${encodeURIComponent(query)}`,
-      {
-        method: "GET",
-        headers: getAuthHeaders(),
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) return [];
-
-    const data = (await res.json()) as Clinic[];
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
+// Removed searchClinics (search feature discontinued)
 
 export async function getAllHealthUsers(): Promise<HealthUser[]> {
   const apiUrl = getApiUrl();
@@ -81,27 +55,7 @@ export async function getAllHealthUsers(): Promise<HealthUser[]> {
   }
 }
 
-export async function searchHealthUsers(query: string): Promise<HealthUser[]> {
-  const apiUrl = getApiUrl();
-
-  try {
-    const res = await fetch(
-      `${apiUrl}/health-users/search?name=${encodeURIComponent(query)}`,
-      {
-        method: "GET",
-        headers: getAuthHeaders(),
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) return [];
-
-    const data = (await res.json()) as HealthUser[];
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
+// Removed searchHealthUsers (search feature discontinued)
 
 export async function getAllHealthWorkers(): Promise<HealthWorker[]> {
   const apiUrl = getApiUrl();
@@ -122,28 +76,7 @@ export async function getAllHealthWorkers(): Promise<HealthWorker[]> {
   }
 }
 
-export async function searchHealthWorkers(
-  query: string
-): Promise<HealthWorker[]> {
-  const apiUrl = getApiUrl();
-
-  try {
-    const res = await fetch(
-      `${apiUrl}/health-workers/search?name=${encodeURIComponent(query)}`,
-      {
-        method: "GET",
-        headers: getAuthHeaders(),
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) return [];
-
-    return (await res.json()) as HealthWorker[];
-  } catch {
-    return [];
-  }
-}
+// Removed searchHealthWorkers (search feature discontinued)
 
 export async function getAllClinicalDocuments(): Promise<ClinicalDocument[]> {
   const apiUrl = getApiUrl();
@@ -163,63 +96,11 @@ export async function getAllClinicalDocuments(): Promise<ClinicalDocument[]> {
   }
 }
 
-export async function searchClinicalDocuments(
-  query: string
-): Promise<ClinicalDocument[]> {
-  const apiUrl = getApiUrl();
+// Removed searchClinicalDocuments (search feature discontinued)
 
-  try {
-    const res = await fetch(
-      `${apiUrl}/clinical-documents/search?title=${encodeURIComponent(query)}`,
-      {
-        method: "GET",
-        headers: getAuthHeaders(),
-        cache: "no-store",
-      }
-    );
+// Removed getAllEntities (generic helper used by search page)
 
-    if (!res.ok) return [];
-
-    return (await res.json()) as ClinicalDocument[];
-  } catch {
-    return [];
-  }
-}
-
-export async function getAllEntities(
-  entity: EntityType
-): Promise<(Clinic | HealthUser | HealthWorker | ClinicalDocument)[]> {
-  switch (entity) {
-    case "clinics":
-      return getAllClinics();
-    case "health-users":
-      return getAllHealthUsers();
-    case "health-workers":
-      return getAllHealthWorkers();
-    case "clinical-documents":
-      return getAllClinicalDocuments();
-    default:
-      throw new Error(`Unsupported entity: ${entity satisfies never}`);
-  }
-}
-
-export async function searchEntities(
-  entity: EntityType,
-  query: string
-): Promise<(Clinic | HealthUser | HealthWorker | ClinicalDocument)[]> {
-  switch (entity) {
-    case "clinics":
-      return searchClinics(query);
-    case "health-users":
-      return searchHealthUsers(query);
-    case "health-workers":
-      return searchHealthWorkers(query);
-    case "clinical-documents":
-      return searchClinicalDocuments(query);
-    default:
-      throw new Error(`Unsupported entity: ${entity satisfies never}`);
-  }
-}
+// Removed searchEntities (generic search helper used by search page)
 
 export async function getActiveUsersCount(): Promise<number> {
   const apiUrl = getApiUrl();
