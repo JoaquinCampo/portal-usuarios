@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { AppHeader } from "@/app/_components/app-header";
-import { Card } from "@/components/ui/card";
+import { SignOutButton } from "@/app/_components/sign-out-button";
 import { Button } from "@/components/ui/button";
-import { getNotificationsEnabled, setNotificationsEnabled } from "@/lib/notifications";
+import { Card } from "@/components/ui/card";
+import {
+  getNotificationsEnabled,
+  setNotificationsEnabled,
+} from "@/lib/notifications";
 
 export default function NotificationsPage() {
   const [enabled, setEnabled] = useState(false);
@@ -16,45 +21,55 @@ export default function NotificationsPage() {
   }, []);
 
   const toggle = () => {
-    const next = !enabled;
-    setEnabled(next);
-    setNotificationsEnabled(next);
+    const nextState = !enabled;
+    setEnabled(nextState);
+    setNotificationsEnabled(nextState);
   };
 
   return (
     <div className="min-h-screen bg-background dark">
-      <AppHeader subtitle="Gestión de notificaciones" />
+      <AppHeader
+        subtitle="Gestion de notificaciones"
+        rightSlot={<SignOutButton />}
+      />
 
       <main className="container mx-auto px-6 py-8">
         <Card className="border-border bg-card p-6">
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl font-semibold text-foreground">Preferencias</h2>
+              <h2 className="text-xl font-semibold text-foreground">
+                Preferencias
+              </h2>
               <p className="text-sm text-muted-foreground">
-                Activá o desactivá el envío de notificaciones. Podés cambiarlo en cualquier momento.
+                Activa o desactiva el envio de notificaciones. Podes cambiarlo
+                en cualquier momento.
               </p>
             </div>
 
             <div className="flex items-center justify-between rounded-lg border border-border bg-background p-4">
               <div>
-                <p className="font-medium text-foreground">Recibir notificaciones</p>
+                <p className="font-medium text-foreground">
+                  Recibir notificaciones
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  {enabled ? "Actualmente las notificaciones están habilitadas." : "Actualmente las notificaciones están deshabilitadas."}
+                  {enabled
+                    ? "Actualmente las notificaciones estan habilitadas."
+                    : "Actualmente las notificaciones estan deshabilitadas."}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                {/* Simple toggle using a button for consistency with existing UI */}
-                <Button onClick={toggle} variant={enabled ? "default" : "outline"}>
+                <Button
+                  onClick={toggle}
+                  variant={enabled ? "default" : "outline"}
+                >
                   {enabled ? "Deshabilitar" : "Habilitar"}
                 </Button>
               </div>
             </div>
 
-            {mounted && (
-              <p className="text-xs text-muted-foreground">
-                Preferencia guardada.
-              </p>
-            )}
+            {mounted ? (
+              <p className="text-xs text-muted-foreground">Preferencia guardada.</p>
+            ) : null}
           </div>
         </Card>
       </main>

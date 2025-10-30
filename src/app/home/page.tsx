@@ -1,43 +1,83 @@
+import { redirect } from "next/navigation";
 import { Bell, FileText, History, ShieldCheck } from "lucide-react";
-import { AppHeader } from "@/app/_components/app-header";
-import { OptionCard } from "./_components/option-card";
 
-export default function HomePage() {
+import { AppHeader } from "@/app/_components/app-header";
+import { SignOutButton } from "@/app/_components/sign-out-button";
+import { OptionCard } from "./_components/option-card";
+import { readSession } from "@/lib/session";
+
+export default async function HomePage() {
+  const session = await readSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const subtitle = `Bienvenido ${session.healthUser.name}.`;
+  const attributes = session.attributes ?? {};
+  const documentNumber = attributes.numero_documento ?? session.healthUser.id;
+  const email = attributes.email ?? "No disponible";
+  const identityLevel = attributes.nid ?? "Sin especificar";
+
   return (
     <div className="min-h-screen bg-background dark">
-      <AppHeader subtitle="Bienvenido. Esta es la página de inicio básica." />
+      <AppHeader subtitle={subtitle} rightSlot={<SignOutButton />} />
 
-      <main className="container mx-auto px-6 py-12">
+      <main className="container mx-auto px-6 py-12 space-y-6">
+        <div className="rounded-lg border border-border bg-card/40 p-6 text-sm text-muted-foreground">
+          <p>
+            Acceso autorizado para la clinica {session.clinic.name}. Decision:
+            {` ${session.access.source} - ${session.access.message}`}
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-lg border border-border bg-card p-5">
+            <h3 className="text-sm font-medium text-foreground">Documento</h3>
+            <p className="mt-1 text-lg text-muted-foreground">{documentNumber}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-5">
+            <h3 className="text-sm font-medium text-foreground">Correo</h3>
+            <p className="mt-1 text-lg text-muted-foreground break-all">{email}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-5">
+            <h3 className="text-sm font-medium text-foreground">
+              Nivel de identidad (acr)
+            </h3>
+            <p className="mt-1 text-lg text-muted-foreground">{identityLevel}</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-6">
           <OptionCard
-            title="Gestión de notificaciones"
-            description="Activá o desactivá el envío de notificaciones."
+            title="Gestion de notificaciones"
+            description="Activa o desactiva el envio de notificaciones."
             href="/notifications"
-            ctaLabel="Gestión"
+            ctaLabel="Gestionar"
             icon={<Bell className="h-4 w-4" />}
           />
 
           <OptionCard
-            title="Visualización de historia clínica"
-            description="Accedé a documentos clínicos y sus detalles."
+            title="Visualizacion de historia clinica"
+            description="Accede a documentos clinicos y sus detalles."
             href="/clinical-history"
             ctaLabel="Historia"
             icon={<FileText className="h-4 w-4" />}
           />
-          
+
           <OptionCard
-            title="Visualización de accesos a historia clínica"
-            description="Listado de accesos a documentos clínicos (ejemplos)."
+            title="Visualizacion de accesos"
+            description="Listado de accesos a documentos clinicos (ejemplo)."
             href="/clinical-history-access"
             ctaLabel="Accesos"
             icon={<History className="h-4 w-4" />}
           />
 
           <OptionCard
-            title="Gestión de políticas de accesos"
-            description="Revisá y resolvé solicitudes de acceso a la historia clínica."
+            title="Politicas de acceso"
+            description="Revisa y resuelve solicitudes de acceso a la historia clinica."
             href="/access-policies"
-            ctaLabel="Políticas"
+            ctaLabel="Ver politicas"
             icon={<ShieldCheck className="h-4 w-4" />}
           />
         </div>
