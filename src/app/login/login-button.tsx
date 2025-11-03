@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -8,18 +8,19 @@ import { Button } from "@/components/ui/button";
 export function LoginButton() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get("redirectTo") ?? "/home";
-
-  const handleLogin = useCallback(() => {
-    const target = new URL("/api/auth/login", window.location.origin);
-    if (redirectTo) {
-      target.searchParams.set("redirectTo", redirectTo);
+  const action = useMemo(() => {
+    if (process.env.NEXT_PUBLIC_LOGIN_ACTION) {
+      return process.env.NEXT_PUBLIC_LOGIN_ACTION;
     }
-    window.location.href = target.toString();
-  }, [redirectTo]);
+    return "/api/auth/login";
+  }, []);
 
   return (
-    <Button size="lg" className="w-full" onClick={handleLogin}>
-      Iniciar sesion con GUB.UY
-    </Button>
+    <form action={action} method="post" className="w-full">
+      <input type="hidden" name="redirectTo" value={redirectTo} />
+      <Button size="lg" className="w-full" type="submit">
+        Iniciar sesion con GUB.UY
+      </Button>
+    </form>
   );
 }

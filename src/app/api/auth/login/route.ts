@@ -20,7 +20,11 @@ function errorRedirect(request: NextRequest, message: string) {
   return NextResponse.redirect(url);
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  return new NextResponse(null, { status: 405 });
+}
+
+export async function POST(request: NextRequest) {
   try {
     const [config] = await Promise.all([getOpenIdConfiguration()]);
 
@@ -32,8 +36,8 @@ export async function GET(request: NextRequest) {
     const scopes = getRequestedScopes();
     const acrValues = getRequestedAcrValues();
 
-    const requestUrl = new URL(request.url);
-    const redirectTo = requestUrl.searchParams.get("redirectTo") ?? "/home";
+    const formData = await request.formData();
+    const redirectTo = String(formData.get("redirectTo") ?? "/home");
 
     const authorizationUrl = new URL(config.authorization_endpoint);
     authorizationUrl.searchParams.set("response_type", "code");
@@ -49,7 +53,9 @@ export async function GET(request: NextRequest) {
       authorizationUrl.searchParams.set("acr_values", acrValues);
     }
 
-    const response = NextResponse.redirect(authorizationUrl.toString());
+    const response = NextResponse.redirect(authorizationUrl.toString(), {
+      status: 302,
+    });
 
     const commonCookieOptions = {
       httpOnly: true,

@@ -17,7 +17,7 @@ export default async function HomePage() {
   const attributes = session.attributes ?? {};
   const documentNumber = attributes.numero_documento ?? session.healthUser.id;
   const email = attributes.email ?? "No disponible";
-  const identityLevel = attributes.nid ?? "Sin especificar";
+  
 
   return (
     <div className="min-h-screen bg-background dark">
@@ -31,7 +31,7 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-border bg-card p-5">
             <h3 className="text-sm font-medium text-foreground">Documento</h3>
             <p className="mt-1 text-lg text-muted-foreground">{documentNumber}</p>
@@ -39,12 +39,6 @@ export default async function HomePage() {
           <div className="rounded-lg border border-border bg-card p-5">
             <h3 className="text-sm font-medium text-foreground">Correo</h3>
             <p className="mt-1 text-lg text-muted-foreground break-all">{email}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-card p-5">
-            <h3 className="text-sm font-medium text-foreground">
-              Nivel de identidad (acr)
-            </h3>
-            <p className="mt-1 text-lg text-muted-foreground">{identityLevel}</p>
           </div>
         </div>
 
