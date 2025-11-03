@@ -2,19 +2,18 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, set up environment variables and run the development server (this app uses port 8080 in dev):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# copy environment template and fill values
+copy .env.example .env.local
+
+# install and run (PNPM recommended)
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:8080/login](http://localhost:8080/login) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
@@ -64,3 +63,7 @@ This project includes GitLab CI/CD configuration for automatic deployment to Ver
 - **deploy**: Deploys the built application to Vercel production
 
 The pipeline automatically runs on pushes to the `main` branch and creates deployments at `https://your-project-name.vercel.app`.
+
+## GUB.UY (ID Uruguay) OpenID Connect
+
+This app integrates with ID Uruguay via OpenID Connect (Authorization Code + PKCE). It now supports both RS256 (via JWKS) and HS256 (via client_secret) ID token signatures, and can consume the V2 well-known config.

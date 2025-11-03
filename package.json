@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 8080",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -15,6 +15,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.545.0",
+    "jose": "^5.2.0",
     "next": "15.5.4",
     "nuqs": "^2.7.1",
     "pusher-js": "^8.4.0",

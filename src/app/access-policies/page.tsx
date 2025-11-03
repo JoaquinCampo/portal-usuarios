@@ -1,4 +1,6 @@
 import { AppHeader } from "@/app/_components/app-header";
+import { SignOutButton } from "@/app/_components/sign-out-button";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,62 +9,65 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+
+const REQUESTS = [
+  {
+    ci: "4.987.654-3",
+    name: "Sofia Martinez",
+    clinic: "Clinica Central",
+    specialty: "Cardiologia",
+  },
+  {
+    ci: "1.234.567-0",
+    name: "Diego Lopez",
+    clinic: "Sanatorio del Este",
+    specialty: "Neurologia",
+  },
+  {
+    ci: "6.543.210-9",
+    name: "Valentina Silva",
+    clinic: "Hospital Norte",
+    specialty: "Traumatologia",
+  },
+  {
+    ci: "8.765.432-1",
+    name: "Matias Romero",
+    clinic: "Policlinica Sur",
+    specialty: "Dermatologia",
+  },
+];
 
 export default function AccessPoliciesPage() {
-  // Datos de ejemplo (moqueados)
-  const requests = [
-    {
-      ci: "4.987.654-3",
-      name: "Sofía Martínez",
-      clinic: "Clínica Central",
-      specialty: "Cardiología",
-    },
-    {
-      ci: "1.234.567-0",
-      name: "Diego López",
-      clinic: "Sanatorio del Este",
-      specialty: "Neurología",
-    },
-    {
-      ci: "6.543.210-9",
-      name: "Valentina Silva",
-      clinic: "Hospital Norte",
-      specialty: "Traumatología",
-    },
-    {
-      ci: "8.765.432-1",
-      name: "Matías Romero",
-      clinic: "Policlínica Sur",
-      specialty: "Dermatología",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background dark">
-      <AppHeader subtitle="Gestión de políticas de accesos" />
+      <AppHeader
+        subtitle="Gestion de politicas de acceso"
+        rightSlot={<SignOutButton />}
+      />
       <main className="container mx-auto px-6 py-8">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>CI</TableHead>
               <TableHead>Nombre</TableHead>
-              <TableHead>Clínica</TableHead>
+              <TableHead>Clinica</TableHead>
               <TableHead>Especialidad</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requests.map((r, idx) => (
-              <TableRow key={idx}>
-                <TableCell className="text-white">{r.ci}</TableCell>
-                <TableCell className="text-white">{r.name}</TableCell>
-                <TableCell className="text-white">{r.clinic}</TableCell>
-                <TableCell className="text-white">{r.specialty}</TableCell>
+            {REQUESTS.map((request, index) => (
+              <TableRow key={`${request.ci}-${index}`}>
+                <TableCell className="text-white">{request.ci}</TableCell>
+                <TableCell className="text-white">{request.name}</TableCell>
+                <TableCell className="text-white">{request.clinic}</TableCell>
+                <TableCell className="text-white">{request.specialty}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button size="sm">Aceptar</Button>
-                    <Button size="sm" variant="destructive">Rechazar</Button>
+                    <Button size="sm" variant="destructive">
+                      Rechazar
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

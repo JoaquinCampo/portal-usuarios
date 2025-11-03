@@ -2,87 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Users, Wifi, WifiOff } from "lucide-react";
-import { getPusherInstance } from "@/lib/pusher";
-import { getActiveUsersCount } from "@/lib/api";
+import { Users } from "lucide-react";
 
 export function ActiveUsersCounter() {
   const [activeUsers, setActiveUsers] = useState(0);
-  const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-
-    const fetchInitialCount = async () => {
-      try {
-        const count = await getActiveUsersCount();
-        if (mounted) {
-          setActiveUsers(count);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Failed to fetch initial active users count:", error);
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchInitialCount();
-
-    const pusher = getPusherInstance();
-
-    pusher.connection.bind("connected", () => {
-      if (mounted) {
-        setIsConnected(true);
-      }
-    });
-
-    pusher.connection.bind("disconnected", () => {
-      if (mounted) {
-        setIsConnected(false);
-      }
-    });
-
-    pusher.connection.bind("error", (err: unknown) => {
-      console.error("Pusher connection error:", err);
-      if (mounted) {
-        setIsConnected(false);
-      }
-    });
-
-    const channel = pusher.subscribe("active-users");
-
-    channel.bind("user-count-updated", (data: { count: number }) => {
-      console.log("Received active users update:", data);
-      if (mounted) {
-        setActiveUsers(data.count);
-      }
-    });
+    const timeout = setTimeout(() => {
+      setActiveUsers(128);
+      setIsLoading(false);
+    }, 300);
 
     return () => {
-      mounted = false;
-      channel.unbind_all();
-      pusher.unsubscribe("active-users");
+      clearTimeout(timeout);
     };
   }, []);
 
   return (
     <div className="flex items-center gap-3">
       <div className="text-right">
-        <div className="flex items-center justify-end gap-2">
-          <p className="text-xs text-muted-foreground">Active Users (24h)</p>
-          {!isLoading && (
-            <div className="relative">
-              {isConnected ? (
-                <Wifi className="h-3 w-3 text-success" />
-              ) : (
-                <WifiOff className="h-3 w-3 text-muted-foreground" />
-              )}
-            </div>
-          )}
-        </div>
+        <p className="text-xs text-muted-foreground">Usuarios activos (mock)</p>
         <p className="text-2xl font-semibold text-foreground">
           {isLoading ? "..." : activeUsers}
         </p>
