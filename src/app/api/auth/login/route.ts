@@ -53,6 +53,10 @@ export async function POST(request: NextRequest) {
       authorizationUrl.searchParams.set("acr_values", acrValues);
     }
 
+    if (process.env.NODE_ENV === "development") {
+      console.info("GUB.UY authorize URL", authorizationUrl.toString());
+    }
+
     const response = NextResponse.redirect(authorizationUrl.toString(), {
       status: 302,
     });

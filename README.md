@@ -63,3 +63,7 @@ This project includes GitLab CI/CD configuration for automatic deployment to Ver
 - **deploy**: Deploys the built application to Vercel production
 
 The pipeline automatically runs on pushes to the `main` branch and creates deployments at `https://your-project-name.vercel.app`.
+
+## GUB.UY (ID Uruguay) OpenID Connect
+
+This app integrates with ID Uruguay via OpenID Connect (Authorization Code + PKCE). It now supports both RS256 (via JWKS) and HS256 (via client_secret) ID token signatures, and can consume the V2 well-known config.

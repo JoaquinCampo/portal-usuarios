@@ -24,8 +24,10 @@ export interface TokenResponse {
 
 let discoveryPromise: Promise<OpenIdConfiguration> | null = null;
 let jwksCache: ReturnType<typeof createRemoteJWKSet> | null = null;
-let jwksRawPromise: Promise<JsonWebKey[]> | null = null;
-const legacyKeyCache = new Map<string, JsonWebKey>();
+type Jwk = { kty: string; kid?: string; n?: string; e?: string; [key: string]: unknown };
+
+let jwksRawPromise: Promise<Jwk[]> | null = null;
+const legacyKeyCache = new Map<string, Jwk>();
 const DEFAULT_LEGACY_KEY = "__default__";
 
 export const GUBUY_STATE_COOKIE = "gubuy_oauth_state";
@@ -62,7 +64,7 @@ export function getRequestedAcrValues(): string | undefined {
 }
 
 export function getPostLogoutRedirectUri(): string {
-  return process.env.GUBUY_POST_LOGOUT_REDIRECT_URI ?? "http://localhost:3000/login";
+  return process.env.GUBUY_POST_LOGOUT_REDIRECT_URI ?? "http://localhost:8080/login";
 }
 
 export async function getOpenIdConfiguration(): Promise<OpenIdConfiguration> {
@@ -95,7 +97,7 @@ export async function getJwks() {
   return jwksCache;
 }
 
-async function getRawJwks(): Promise<JsonWebKey[]> {
+async function getRawJwks(): Promise<Jwk[]> {
   if (!jwksRawPromise) {
     jwksRawPromise = (async () => {
       const config = await getOpenIdConfiguration();
@@ -109,7 +111,7 @@ async function getRawJwks(): Promise<JsonWebKey[]> {
               `Failed to load JWKS (${response.status} ${response.statusText}): ${text}`,
             );
           }
-          const data = (await response.json()) as { keys?: JsonWebKey[] };
+          const data = (await response.json()) as { keys?: Jwk[] };
           const keys = data.keys ?? [];
           cacheLegacyKeys(keys);
           return keys;
@@ -131,7 +133,7 @@ async function getRawJwks(): Promise<JsonWebKey[]> {
   return jwksRawPromise;
 }
 
-function cacheLegacyKeys(keys: JsonWebKey[]): void {
+function cacheLegacyKeys(keys: Jwk[]): void {
   for (const key of keys) {
     if (key.kty !== "RSA") continue;
     const cacheKey =
@@ -143,14 +145,14 @@ function cacheLegacyKeys(keys: JsonWebKey[]): void {
   }
 }
 
-function getCachedLegacyKey(kid?: string): JsonWebKey | undefined {
+function getCachedLegacyKey(kid?: string): Jwk | undefined {
   if (kid && legacyKeyCache.has(kid)) {
     return legacyKeyCache.get(kid);
   }
   return legacyKeyCache.get(DEFAULT_LEGACY_KEY) ?? legacyKeyCache.values().next().value;
 }
 
-async function resolveLegacyJwk(kid?: string): Promise<JsonWebKey> {
+async function resolveLegacyJwk(kid?: string): Promise<Jwk> {
   const cached = getCachedLegacyKey(kid);
   if (cached) {
     return cached;
@@ -165,26 +167,38 @@ async function resolveLegacyJwk(kid?: string): Promise<JsonWebKey> {
 
 export async function verifyIdToken(idToken: string): Promise<JWTPayload> {
   const config = await getOpenIdConfiguration();
-  const jwks = await getJwks();
   const clientId = getClientId();
+  const { alg } = decodeProtectedHeader(idToken);
 
+  // Support HS256 (HMAC with client secret) and RS256 (with JWKS)
+  if (alg === "HS256") {
+    const clientSecret = getClientSecret();
+    if (!clientSecret) {
+      throw new Error("ID token uses HS256 but GUBUY_CLIENT_SECRET is not configured");
+    }
+    const secret = new TextEncoder().encode(clientSecret);
+    const { payload } = await jwtVerify(idToken, secret);
+    // Manual claims validation (issuer/audience/time) with flexible issuer matching
+    validateIdTokenClaims(payload, config, clientId);
+    return payload;
+  }
+
+  // Default to RS256 with remote JWKS, with legacy RSA fallback
+  const jwks = await getJwks();
   try {
-    const { payload } = await jwtVerify(idToken, jwks, {
-      issuer: config.issuer,
-      audience: clientId,
-    });
+    const { payload } = await jwtVerify(idToken, jwks);
+    validateIdTokenClaims(payload, config, clientId);
     return payload;
   } catch (error) {
+    // Known Node crypto edge: modulusLength error on some environments -> fallback to manual RSA verify
     if (
-      !(
-        error instanceof TypeError &&
-        typeof error.message === "string" &&
-        error.message.includes("modulusLength")
-      )
+      error instanceof TypeError &&
+      typeof error.message === "string" &&
+      error.message.includes("modulusLength")
     ) {
-      throw error;
+      return verifyIdTokenWithLegacyRsaKey(idToken, config, clientId);
     }
-    return verifyIdTokenWithLegacyRsaKey(idToken, config, clientId);
+    throw error;
   }
 }
 
@@ -281,7 +295,7 @@ async function verifyIdTokenWithLegacyRsaKey(
     throw new Error("Unable to locate RSA key for ID token verification");
   }
 
-  const publicKey = createPublicKey({ key: jwk, format: "jwk" });
+  const publicKey = createPublicKey({ key: (jwk as unknown) as import("crypto").JsonWebKey, format: "jwk" });
   const [encodedHeader, encodedPayload, encodedSignature] = idToken.split(".");
   if (!encodedHeader || !encodedPayload || !encodedSignature) {
     throw new Error("ID token has an invalid format");
@@ -320,6 +334,7 @@ function validateIdTokenClaims(
   issuerCandidates.add(normalizedIssuer);
   issuerCandidates.add(`${normalizedIssuer}/oidc`);
   issuerCandidates.add(`${normalizedIssuer}/oidc/v1`);
+  issuerCandidates.add(`${normalizedIssuer}/oidc/v2`);
 
   const tokenIssuer = typeof payload.iss === "string" ? payload.iss.replace(/\/+$/, "") : "";
   if (!tokenIssuer || !issuerCandidates.has(tokenIssuer)) {
