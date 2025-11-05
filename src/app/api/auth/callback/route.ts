@@ -85,19 +85,21 @@ export async function GET(request: NextRequest) {
     const email =
       extractStringClaim(userClaims["email"]) ?? extractStringClaim(tokenClaims["email"]);
 
+    const combinedNameFromParts = [
+      extractStringClaim(userClaims["primer_nombre"]) ??
+        extractStringClaim(tokenClaims["given_name"]),
+      extractStringClaim(userClaims["primer_apellido"]) ??
+        extractStringClaim(tokenClaims["family_name"]),
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     const fullName =
       extractStringClaim(userClaims["nombre_completo"]) ??
       extractStringClaim(tokenClaims["nombre_completo"]) ??
-      [
-        extractStringClaim(userClaims["primer_nombre"]) ??
-          extractStringClaim(tokenClaims["given_name"]),
-        extractStringClaim(userClaims["primer_apellido"]) ??
-          extractStringClaim(tokenClaims["family_name"]),
-      ]
-        .filter(Boolean)
-        .join(" ") ||
-      extractStringClaim(tokenClaims["name"]) ||
-      email ||
+      extractStringClaim(combinedNameFromParts) ??
+      extractStringClaim(tokenClaims["name"]) ??
+      email ??
       documentNumber;
 
     const identityLevel =
