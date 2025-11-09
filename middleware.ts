@@ -28,12 +28,8 @@ export function middleware(request: NextRequest) {
   }
 
   if (!sessionCookie) {
-    const loginUrl = new URL("/login", request.url);
-    if (pathname && pathname !== "/") {
-      const target = `${pathname}${request.nextUrl.search}`;
-      loginUrl.searchParams.set("redirectTo", target);
-    }
-    return NextResponse.redirect(loginUrl);
+    // Allow access without session for guest users
+    return NextResponse.next();
   }
 
   return NextResponse.next();

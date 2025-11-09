@@ -1,16 +1,17 @@
-import { redirect } from "next/navigation";
 import { Bell, FileText, History, ShieldCheck } from "lucide-react";
 
 import { AppHeader } from "@/app/_components/app-header";
 import { SignOutButton } from "@/app/_components/sign-out-button";
 import { OptionCard } from "./_components/option-card";
 import { readSession } from "@/lib/session";
+import HomeGuest from "./_components/home-guest";
 
 export default async function HomePage() {
   const session = await readSession();
 
   if (!session) {
-    redirect("/login");
+    // Modo invitado completo en componente cliente
+    return <HomeGuest />;
   }
 
   const subtitle = `Bienvenido ${session.healthUser.name}.`;
@@ -21,7 +22,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background dark">
-      <AppHeader subtitle={subtitle} rightSlot={<SignOutButton />} />
+      <AppHeader subtitle={subtitle} rightSlot={session ? <SignOutButton /> : <a href="/login" className="text-sm text-muted-foreground hover:text-foreground">Iniciar Sesión</a>} />
 
       <main className="container mx-auto px-6 py-12 space-y-6">
         <div className="rounded-lg border border-border bg-card/40 p-6 text-sm text-muted-foreground">
