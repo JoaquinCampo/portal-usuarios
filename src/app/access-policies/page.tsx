@@ -39,7 +39,7 @@ const REQUESTS = [
 
 export default function AccessPoliciesPage() {
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <AppHeader
         subtitle="Gestion de politicas de acceso"
         rightSlot={<SignOutButton />}
@@ -58,10 +58,10 @@ export default function AccessPoliciesPage() {
           <TableBody>
             {REQUESTS.map((request, index) => (
               <TableRow key={`${request.ci}-${index}`}>
-                <TableCell className="text-white">{request.ci}</TableCell>
-                <TableCell className="text-white">{request.name}</TableCell>
-                <TableCell className="text-white">{request.clinic}</TableCell>
-                <TableCell className="text-white">{request.specialty}</TableCell>
+                <TableCell className="text-foreground">{request.ci}</TableCell>
+                <TableCell className="text-foreground">{request.name}</TableCell>
+                <TableCell className="text-foreground">{request.clinic}</TableCell>
+                <TableCell className="text-foreground">{request.specialty}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button size="sm">Aceptar</Button>

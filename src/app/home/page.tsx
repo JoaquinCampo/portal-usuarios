@@ -21,7 +21,7 @@ export default async function HomePage() {
   
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <AppHeader subtitle={subtitle} rightSlot={session ? <SignOutButton /> : <a href="/login" className="text-sm text-muted-foreground hover:text-foreground">Iniciar Sesión</a>} />
 
       <main className="container mx-auto px-6 py-12 space-y-6">

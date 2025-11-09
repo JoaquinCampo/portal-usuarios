@@ -10,7 +10,7 @@ export default async function NotificationsPage() {
     session?.attributes?.numero_documento ?? session?.healthUser?.id ?? null;
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <AppHeader
         subtitle="Gestion de notificaciones"
         rightSlot={

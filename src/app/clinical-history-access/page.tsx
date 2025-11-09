@@ -44,7 +44,7 @@ const ACCESS_LOG = [
 
 export default function ClinicalHistoryAccessPage() {
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <AppHeader
         subtitle="Visualizacion de accesos a historia clinica"
         rightSlot={<SignOutButton />}
@@ -70,11 +70,11 @@ export default function ClinicalHistoryAccessPage() {
           <TableBody>
             {ACCESS_LOG.map((entry, index) => (
               <TableRow key={`${entry.ci}-${index}`}>
-                <TableCell className="text-white">{entry.ci}</TableCell>
-                <TableCell className="text-white">{entry.name}</TableCell>
-                <TableCell className="text-white">{entry.clinic}</TableCell>
-                <TableCell className="text-white">{entry.specialty}</TableCell>
-                <TableCell className="text-white">
+                <TableCell className="text-foreground">{entry.ci}</TableCell>
+                <TableCell className="text-foreground">{entry.name}</TableCell>
+                <TableCell className="text-foreground">{entry.clinic}</TableCell>
+                <TableCell className="text-foreground">{entry.specialty}</TableCell>
+                <TableCell className="text-foreground">
                   {entry.documentTitle}
                 </TableCell>
               </TableRow>

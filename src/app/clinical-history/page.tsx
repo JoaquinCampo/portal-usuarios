@@ -4,7 +4,7 @@ import { ClinicalHistorySearch } from "./_components/clinical-history-search";
 
 export default function ClinicalHistoryPage() {
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <AppHeader
         subtitle="Visualizacion de historia clinica"
         rightSlot={<SignOutButton />}

@@ -66,7 +66,7 @@ export default function HomeGuest() {
   };
 
   return (
-    <div className="min-h-screen bg-background dark">
+    <div className="min-h-screen bg-background">
       <AppHeader
         subtitle={subtitle}
         rightSlot={<a href="/login" className="text-sm text-muted-foreground hover:text-foreground">Iniciar Sesión</a>}
