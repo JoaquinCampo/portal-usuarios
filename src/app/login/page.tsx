@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const errorMessage = params.error;
 
   return (
-    <div className="min-h-screen bg-background dark flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <AppHeader subtitle="Acceso al portal de usuarios" homeHref="/login" />
       <main className="flex flex-1 items-center justify-center px-6 py-12">
         <Card className="w-full max-w-md border-border bg-card p-8">

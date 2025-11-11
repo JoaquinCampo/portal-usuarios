@@ -9,8 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { OptionCard } from "../_components/option-card";
 import { readGuestProfile, saveGuestProfile, type GuestHealthUser } from "@/lib/guest-profile";
+import { GUEST_CI_COOKIE_NAME } from "@/lib/cookie-names";
 
 type FetchState = "idle" | "loading" | "success" | "error";
+
+const GUEST_CI_MAX_AGE_SECONDS = 60 * 60 * 8; // 8 hours
+
+function persistGuestCi(ci?: string | null) {
+  if (typeof document === "undefined") return;
+  const sanitized = ci?.trim();
+  if (sanitized) {
+    document.cookie = `${GUEST_CI_COOKIE_NAME}=${encodeURIComponent(
+      sanitized
+    )}; path=/; max-age=${GUEST_CI_MAX_AGE_SECONDS}; SameSite=Lax`;
+  } else {
+    document.cookie = `${GUEST_CI_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  }
+}
 
 export default function HomeGuest() {
   const [ci, setCi] = useState("");
@@ -19,7 +34,9 @@ export default function HomeGuest() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setProfile(readGuestProfile());
+    const storedProfile = readGuestProfile();
+    setProfile(storedProfile);
+    persistGuestCi(storedProfile?.ci);
   }, []);
 
   const subtitle = useMemo(
@@ -58,6 +75,7 @@ export default function HomeGuest() {
       };
       saveGuestProfile(p);
       setProfile(p);
+      persistGuestCi(p.ci);
       setState("success");
     } catch (err: any) {
       setState("error");
@@ -139,7 +157,7 @@ export default function HomeGuest() {
 
           <OptionCard
             title="Políticas de acceso"
-            description="Revisa y resuelve solicitudes de acceso a la historia clínica."
+            description="Gestiona las políticas de acceso a la historia clínica."
             href="/access-policies"
             ctaLabel="Ver políticas"
             icon={<ShieldCheck className="h-4 w-4" />}

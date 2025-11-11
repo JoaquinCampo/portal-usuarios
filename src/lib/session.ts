@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
+import { SESSION_COOKIE_NAME } from "./cookie-names";
 
-export const SESSION_COOKIE_NAME = "portal_session";
+export { SESSION_COOKIE_NAME };
 
 export interface PortalSession {
   healthUser: {
