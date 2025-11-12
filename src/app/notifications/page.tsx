@@ -1,7 +1,7 @@
 import { AppHeader } from "@/app/_components/app-header";
 import { SignOutButton } from "@/app/_components/sign-out-button";
 import { Card } from "@/components/ui/card";
-import { NotificationPreferenceToggle } from "./_components/notification-preference-toggle";
+import { NotificationSubscriptionsManager } from "./_components/notification-subscriptions-manager";
 import { readSession } from "@/lib/session";
 
 export default async function NotificationsPage() {
@@ -31,18 +31,12 @@ export default async function NotificationsPage() {
         <Card className="border-border bg-card p-6">
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl font-semibold text-foreground">
-                Preferencias
-              </h2>
+              <h2 className="text-xl font-semibold text-foreground">Preferencias de notificaciones</h2>
               <p className="text-sm text-muted-foreground">
-                Activa o desactiva el envio de notificaciones. Podes cambiarlo
-                en cualquier momento.
+                Administrá qué tipos de notificaciones querés recibir. No necesitás volver a ingresar tu CI.
               </p>
             </div>
-            <NotificationPreferenceToggle
-              sessionCi={documentNumber}
-              isAuthenticated={Boolean(session)}
-            />
+            <NotificationSubscriptionsManager sessionCi={documentNumber} isAuthenticated={Boolean(session)} />
           </div>
         </Card>
       </main>
