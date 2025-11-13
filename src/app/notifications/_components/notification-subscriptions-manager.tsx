@@ -39,7 +39,7 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
       setStatus("loading");
       setError(null);
       try {
-        const res = await fetch(`/api/notifications/subscription-preferences/${encodeURIComponent(ci)}`, {
+        const res = await fetch(`/api/notifications/subscription-preferences/${encodeURIComponent(ci!)}`, {
           cache: "no-store",
         });
         const text = await res.text();
@@ -77,7 +77,7 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
       return;
     }
 
-    const endpoint = next ? "/api/notifications/subscribe" : "/api/notifications/unsubscribe";
+  const endpoint = next ? "/api/notifications/subscribe" : "/api/notifications/unsubscribe";
     const current = type === "ACCESS_REQUEST" ? accessReqEnabled : clinicalEnabled;
     // optimistic update
     type === "ACCESS_REQUEST" ? setAccessReqEnabled(next) : setClinicalEnabled(next);

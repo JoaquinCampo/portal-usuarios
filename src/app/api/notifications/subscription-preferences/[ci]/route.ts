@@ -1,8 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { resolveAuthHeader, resolveBaseApiUrl } from "@/lib/hcen-api";
 
-export async function GET(_: Request, { params }: { params: { ci: string } }) {
-  const { ci } = params;
+export async function GET(
+  _: Request,
+  context: { params: Promise<{ ci: string }> }
+) {
+  const { ci } = await context.params;
   if (!ci) {
     return NextResponse.json({ error: "Missing ci" }, { status: 400 });
   }
@@ -29,4 +32,5 @@ export async function GET(_: Request, { params }: { params: { ci: string } }) {
     return NextResponse.json({ error: "Failed to reach HCEN" }, { status: 502 });
   }
 }
+
 

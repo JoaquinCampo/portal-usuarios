@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 const BASE_URL = process.env.HCEN_API_BASE_URL ?? "http://localhost:8080";
 const BASIC_CREDENTIALS = process.env.HCEN_API_BASIC_AUTH ?? "admin:admin";
@@ -10,9 +10,9 @@ function basicAuthHeader(): string {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { ci: string } }
+  context: { params: Promise<{ ci: string }> }
 ) {
-  const ci = params.ci;
+  const { ci } = await context.params;
   if (!ci || !/^[0-9]{5,12}$/.test(ci)) {
     return NextResponse.json(
       { message: "Cédula inválida" },
@@ -49,3 +49,4 @@ export async function GET(
     );
   }
 }
+

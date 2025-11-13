@@ -1,8 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { resolveAuthHeader, resolveBaseApiUrl } from "@/lib/hcen-api";
 
-export async function DELETE(_: Request, { params }: { params: { ci: string; token: string } }) {
-  const { ci, token } = params;
+export async function DELETE(
+  _: Request,
+  context: { params: Promise<{ ci: string; token: string }> }
+) {
+  const { ci, token } = await context.params;
   if (!ci || !token) {
     return NextResponse.json({ error: "Missing ci or token" }, { status: 400 });
   }
@@ -23,4 +26,5 @@ export async function DELETE(_: Request, { params }: { params: { ci: string; tok
     return NextResponse.json({ error: "Failed to reach HCEN" }, { status: 502 });
   }
 }
+
 
