@@ -89,9 +89,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: "Failed to reach HCEN", detail: err?.message ?? String(err) },
+      { error: "Failed to reach HCEN", detail: message },
       { status: 502 },
     );
   }
@@ -127,7 +128,7 @@ export async function GET(request: Request) {
     });
 
     const text = await upstream.text();
-    let data: any = null;
+    let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
@@ -145,17 +146,21 @@ export async function GET(request: Request) {
       );
     }
 
-    const enabled = typeof data?.enabled === "boolean" ? data.enabled : false;
+    const enabled = typeof (data as { enabled?: boolean })?.enabled === "boolean" 
+      ? (data as { enabled: boolean }).enabled 
+      : false;
+    const userCi = (data as { userCi?: string })?.userCi ?? ci;
     return NextResponse.json(
       {
-        userCi: data?.userCi ?? ci,
+        userCi,
         enabled,
       },
       { status: 200 },
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: "Failed to reach HCEN", detail: err?.message ?? String(err) },
+      { error: "Failed to reach HCEN", detail: message },
       { status: 502 },
     );
   }

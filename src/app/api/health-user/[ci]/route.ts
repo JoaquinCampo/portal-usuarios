@@ -10,9 +10,9 @@ function basicAuthHeader(): string {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { ci: string } }
+  { params }: { params: Promise<{ ci: string }> }
 ) {
-  const ci = params.ci;
+  const { ci } = await params;
   if (!ci || !/^[0-9]{5,12}$/.test(ci)) {
     return NextResponse.json(
       { message: "Cédula inválida" },
@@ -32,7 +32,7 @@ export async function GET(
     });
 
     const text = await res.text();
-    let data: any = null;
+    let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
@@ -42,9 +42,10 @@ export async function GET(
 
     // Forward status as-is. Treat 500 of backend as 404-ish for UX? We'll keep status
     return NextResponse.json(data, { status: res.status });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { message: "No se pudo validar la cédula", error: String(err?.message ?? err) },
+      { message: "No se pudo validar la cédula", error: message },
       { status: 502 }
     );
   }

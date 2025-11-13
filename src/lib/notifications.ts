@@ -32,9 +32,9 @@ export async function fetchNotificationsPreference(ci: string): Promise<boolean>
   if (!resp.ok) {
     let message = "No se pudo obtener la preferencia de notificaciones.";
     try {
-      const data = await resp.json();
-      if (typeof (data as any)?.error === "string") {
-        message = (data as any).error;
+      const data = await resp.json() as { error?: string };
+      if (typeof data?.error === "string") {
+        message = data.error;
       }
     } catch {
       // ignore parsing errors
@@ -65,9 +65,9 @@ export async function setNotificationsEnabled(ci: string, value: boolean): Promi
   if (!resp.ok) {
     let message = "No se pudo actualizar la preferencia de notificaciones.";
     try {
-      const data = await resp.json();
-      if (typeof (data as any)?.error === "string") {
-        message = (data as any).error;
+      const data = await resp.json() as { error?: string };
+      if (typeof data?.error === "string") {
+        message = data.error;
       }
     } catch {
       // ignore parsing errors

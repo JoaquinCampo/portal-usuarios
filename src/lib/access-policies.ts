@@ -23,7 +23,7 @@ export interface AddHealthWorkerAccessPolicyPayload {
   accessRequestId?: string | null;
 }
 
-export interface ApiResult<T = any> {
+export interface ApiResult<T = unknown> {
   ok: boolean;
   status: number;
   data: T | null;
@@ -74,24 +74,28 @@ async function requestJson<T>(path: string, init: RequestInit): Promise<ApiResul
       headers,
     });
     const text = await res.text();
-    let data: any = null;
+    let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
       data = text;
     }
+    const errorMessage = res.ok 
+      ? undefined 
+      : (data as { message?: string })?.message || text;
     return {
       ok: res.ok,
       status: res.status,
-      data,
-      error: res.ok ? undefined : data?.message || text,
+      data: data as T | null,
+      error: errorMessage,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       ok: false,
       status: 0,
       data: null,
-      error: error?.message ?? String(error),
+      error: message,
     };
   }
 }

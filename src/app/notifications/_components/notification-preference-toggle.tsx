@@ -54,10 +54,11 @@ export function NotificationPreferenceToggle({
         if (cancelled) return;
         setEnabled(remoteEnabled);
         setStatus("success");
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (cancelled) return;
         setStatus("error");
-        setError(err?.message ?? "No se pudo sincronizar la preferencia.");
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message ?? "No se pudo sincronizar la preferencia.");
       }
     };
 
@@ -87,10 +88,11 @@ export function NotificationPreferenceToggle({
     try {
       await setNotificationsEnabled(ci, nextState);
       setStatus("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setEnabled(!nextState);
       setStatus("error");
-      setError(err?.message ?? "No se pudo actualizar la preferencia.");
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message ?? "No se pudo actualizar la preferencia.");
     }
   };
 

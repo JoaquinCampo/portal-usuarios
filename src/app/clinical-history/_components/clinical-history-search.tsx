@@ -42,15 +42,16 @@ export function ClinicalHistorySearch() {
       });
       const data = (await resp.json()) as ClinicalHistoryResponse | { error?: string };
       if (!resp.ok) {
-        const msg = (data as any)?.error || `Error ${resp.status}`;
+        const msg = (data as { error?: string })?.error || `Error ${resp.status}`;
         setError(msg);
         return;
       }
 
       const docs = (data as ClinicalHistoryResponse)?.clinicalDocuments ?? [];
       setDocuments(docs);
-    } catch (e: any) {
-      setError(e?.message ?? "Error inesperado");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      setError(message ?? "Error inesperado");
     } finally {
       setLoading(false);
     }

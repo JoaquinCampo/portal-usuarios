@@ -19,7 +19,7 @@ function sanitizeString(v: unknown): string | undefined {
   return s.length ? s : undefined;
 }
 
-export async function submitClinicAccessPolicy(_: any, formData: FormData) {
+export async function submitClinicAccessPolicy(_prevState: unknown, formData: FormData) {
   const session = await readSession();
   const cookieStore = await cookies();
   const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
@@ -41,7 +41,7 @@ export async function submitClinicAccessPolicy(_: any, formData: FormData) {
   return { ok: true, message: "Solicitud hecha correctamente" };
 }
 
-export async function submitHealthWorkerAccessPolicy(_: any, formData: FormData) {
+export async function submitHealthWorkerAccessPolicy(_prevState: unknown, formData: FormData) {
   const session = await readSession();
   const cookieStore = await cookies();
   const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
@@ -65,32 +65,30 @@ export async function submitHealthWorkerAccessPolicy(_: any, formData: FormData)
   return { ok: true, message: "Solicitud hecha correctamente" };
 }
 
-export async function deleteClinicAccessPolicyAction(formData: FormData) {
+export async function deleteClinicAccessPolicyAction(formData: FormData): Promise<void> {
   const policyId = sanitizeString(formData.get("clinicAccessPolicyId"));
   if (!policyId) {
-    return { ok: false, message: "ID de la politica de clinica es requerido" };
+    throw new Error("ID de la politica de clinica es requerido");
   }
 
   const res = await deleteClinicAccessPolicyById(policyId);
   if (!res.ok) {
-    return { ok: false, message: res.error || "No se pudo eliminar la politica de clinica" };
+    throw new Error(res.error || "No se pudo eliminar la politica de clinica");
   }
 
   revalidatePath("/access-policies");
-  return { ok: true, message: "Politica de clinica eliminada correctamente" };
 }
 
-export async function deleteHealthWorkerAccessPolicyAction(formData: FormData) {
+export async function deleteHealthWorkerAccessPolicyAction(formData: FormData): Promise<void> {
   const policyId = sanitizeString(formData.get("healthWorkerAccessPolicyId"));
   if (!policyId) {
-    return { ok: false, message: "ID de la politica de profesional es requerido" };
+    throw new Error("ID de la politica de profesional es requerido");
   }
 
   const res = await deleteHealthWorkerAccessPolicyById(policyId);
   if (!res.ok) {
-    return { ok: false, message: res.error || "No se pudo eliminar la politica de profesional" };
+    throw new Error(res.error || "No se pudo eliminar la politica de profesional");
   }
 
   revalidatePath("/access-policies");
-  return { ok: true, message: "Politica de profesional eliminada correctamente" };
 }
