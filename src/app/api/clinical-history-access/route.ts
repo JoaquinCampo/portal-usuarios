@@ -59,9 +59,16 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(data, { status: 200 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json(
-      { error: "Failed to contact HCEN", detail: err?.message ?? String(err) },
+      {
+        error: "Failed to contact HCEN",
+        detail: err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "Unknown error",
+      },
       { status: 502 }
     );
   }

@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: text || "Upstream error" }, { status: upstream.status });
     }
     return new NextResponse(null, { status: 204 });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: "Failed to reach HCEN" }, { status: 502 });
   }
 }

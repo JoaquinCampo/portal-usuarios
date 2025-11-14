@@ -100,9 +100,13 @@ export default function ClinicalHistoryAccessPage() {
           return;
         }
         setData(json as AccessHistoryResponse);
-      } catch (e: any) {
-        if (e?.name === "AbortError") return;
-        setError(e?.message ?? "Error inesperado");
+      } catch (e: unknown) {
+        // In browsers, aborting fetch may throw a DOMException with name 'AbortError'
+        if (typeof e === "object" && e !== null && "name" in e && (e as { name?: unknown }).name === "AbortError") {
+          return;
+        }
+        const message = e instanceof Error ? e.message : "Error inesperado";
+        setError(message);
       } finally {
         setLoading(false);
       }

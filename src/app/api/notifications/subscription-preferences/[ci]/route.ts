@@ -18,17 +18,24 @@ export async function GET(
   try {
     const upstream = await fetch(url, { method: "GET", headers, cache: "no-store" });
     const text = await upstream.text();
-    let data: any = null;
+    let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
       data = text;
     }
     if (!upstream.ok) {
-      return NextResponse.json({ error: data?.error ?? data ?? "Upstream error" }, { status: upstream.status });
+      let message = "Upstream error";
+      if (data && typeof data === "object" && "error" in data) {
+        const errVal = (data as { error: unknown }).error;
+        if (typeof errVal === "string") message = errVal;
+      } else if (typeof data === "string" && data.trim()) {
+        message = data;
+      }
+      return NextResponse.json({ error: message }, { status: upstream.status });
     }
     return NextResponse.json(data ?? {}, { status: 200 });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: "Failed to reach HCEN" }, { status: 502 });
   }
 }

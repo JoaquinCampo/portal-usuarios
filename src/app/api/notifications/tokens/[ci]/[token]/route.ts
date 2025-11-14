@@ -22,7 +22,7 @@ export async function DELETE(
     }
     const text = await upstream.text();
     return NextResponse.json({ error: text || "Upstream error" }, { status: upstream.status });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({ error: "Failed to reach HCEN" }, { status: 502 });
   }
 }

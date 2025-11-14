@@ -32,20 +32,28 @@ export function NotificationsEndpointsForms() {
 
   const canSubmit = (val?: string) => (ci?.trim().length ?? 0) > 0 && (val === undefined || (val?.trim().length ?? 0) > 0);
 
-  const postJson = async (url: string, body: any) => {
+  const postJson = async (url: string, body: unknown) => {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    const text = await res.text();
-    let data: any = null;
+  const text = await res.text();
+  let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
       data = text;
     }
     return { ok: res.ok, status: res.status, data } as const;
+  };
+
+  const extractError = (data: unknown, fallback: string) => {
+    if (data && typeof data === "object" && "error" in data) {
+      const val = (data as { error: unknown }).error;
+      if (typeof val === "string") return val;
+    }
+    return fallback;
   };
 
   return (
@@ -75,7 +83,7 @@ export function NotificationsEndpointsForms() {
               setRegisterMsg(null);
               const res = await postJson("/api/notifications/tokens", { userCi: ci.trim(), token: token.trim() });
               setRegisterStatus(res.ok ? "success" : "error");
-              setRegisterMsg(res.ok ? "Token registrado/actualizado." : (res.data?.error ?? `HTTP ${res.status}`));
+              setRegisterMsg(res.ok ? "Token registrado/actualizado." : extractError(res.data, `HTTP ${res.status}`));
             }}
             disabled={!canSubmit(token) || registerStatus === "loading"}
           >
@@ -141,7 +149,7 @@ export function NotificationsEndpointsForms() {
                 notificationType: notificationType.trim(),
               });
               setSubStatus(res.ok ? "success" : "error");
-              setSubMsg(res.ok ? "Suscrito correctamente." : (res.data?.error ?? `HTTP ${res.status}`));
+              setSubMsg(res.ok ? "Suscrito correctamente." : extractError(res.data, `HTTP ${res.status}`));
             }}
             disabled={!canSubmit(notificationType) || subStatus === "loading"}
           >
@@ -158,7 +166,7 @@ export function NotificationsEndpointsForms() {
                 notificationType: notificationType.trim(),
               });
               setSubStatus(res.ok ? "success" : "error");
-              setSubMsg(res.ok ? "Desuscripto correctamente." : (res.data?.error ?? `HTTP ${res.status}`));
+              setSubMsg(res.ok ? "Desuscripto correctamente." : extractError(res.data, `HTTP ${res.status}`));
             }}
             disabled={!canSubmit(notificationType) || subStatus === "loading"}
           >
@@ -182,7 +190,7 @@ export function NotificationsEndpointsForms() {
               setPrefJson(null);
               const res = await fetch(`/api/notifications/subscription-preferences/${encodeURIComponent(ci.trim())}`);
               const text = await res.text();
-              let data: any = null;
+              let data: unknown = null;
               try {
                 data = text ? JSON.parse(text) : null;
               } catch {
@@ -190,7 +198,7 @@ export function NotificationsEndpointsForms() {
               }
               if (!res.ok) {
                 setPrefStatus("error");
-                setPrefMsg(typeof data?.error === "string" ? data.error : `HTTP ${res.status}`);
+                setPrefMsg(extractError(data, `HTTP ${res.status}`));
               } else {
                 setPrefStatus("success");
                 setPrefJson(JSON.stringify(data, null, 2));

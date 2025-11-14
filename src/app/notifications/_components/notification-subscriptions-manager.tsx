@@ -43,21 +43,35 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
           cache: "no-store",
         });
         const text = await res.text();
-        let data: any = null;
+        let data: unknown = null;
         try {
           data = text ? JSON.parse(text) : null;
         } catch {
           data = text;
         }
-        if (!res.ok) throw new Error(typeof data?.error === "string" ? data.error : `HTTP ${res.status}`);
+        if (!res.ok) {
+          let message = `HTTP ${res.status}`;
+          if (data && typeof data === "object" && "error" in data) {
+            const errVal = (data as { error: unknown }).error;
+            if (typeof errVal === "string") message = errVal;
+          }
+          throw new Error(message);
+        }
         if (cancelled) return;
-        setAccessReqEnabled(Boolean(data?.subscribedToAccessRequest));
-        setClinicalEnabled(Boolean(data?.subscribedToClinicalHistoryAccess));
+        if (data && typeof data === "object") {
+          const accessPref = (data as { subscribedToAccessRequest?: unknown }).subscribedToAccessRequest;
+          const clinicalPref = (data as { subscribedToClinicalHistoryAccess?: unknown }).subscribedToClinicalHistoryAccess;
+          setAccessReqEnabled(Boolean(accessPref));
+          setClinicalEnabled(Boolean(clinicalPref));
+        } else {
+          setAccessReqEnabled(false);
+          setClinicalEnabled(false);
+        }
         setStatus("success");
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (cancelled) return;
         setStatus("error");
-        setError(e?.message ?? "No se pudieron obtener las preferencias.");
+        setError(e instanceof Error ? e.message : "No se pudieron obtener las preferencias.");
       }
     }
     fetchPrefs();
@@ -80,7 +94,11 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
   const endpoint = next ? "/api/notifications/subscribe" : "/api/notifications/unsubscribe";
     const current = type === "ACCESS_REQUEST" ? accessReqEnabled : clinicalEnabled;
     // optimistic update
-    type === "ACCESS_REQUEST" ? setAccessReqEnabled(next) : setClinicalEnabled(next);
+    if (type === "ACCESS_REQUEST") {
+      setAccessReqEnabled(next);
+    } else {
+      setClinicalEnabled(next);
+    }
     setStatus("saving");
     setError(null);
 
@@ -92,11 +110,15 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       setStatus("success");
-    } catch (e: any) {
+    } catch (e: unknown) {
       // rollback
-      type === "ACCESS_REQUEST" ? setAccessReqEnabled(current) : setClinicalEnabled(current);
+      if (type === "ACCESS_REQUEST") {
+        setAccessReqEnabled(current);
+      } else {
+        setClinicalEnabled(current);
+      }
       setStatus("error");
-      setError(e?.message ?? "No se pudo actualizar la preferencia.");
+      setError(e instanceof Error ? e.message : "No se pudo actualizar la preferencia.");
     }
   }
 

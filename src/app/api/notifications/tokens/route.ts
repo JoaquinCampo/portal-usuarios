@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       cache: "no-store",
     });
     const text = await upstream.text();
-    let data: any = null;
+    let data: unknown = null;
     try {
       data = text ? JSON.parse(text) : null;
     } catch {
@@ -31,10 +31,17 @@ export async function POST(request: Request) {
     }
 
     if (!upstream.ok) {
-      return NextResponse.json({ error: data?.error ?? data ?? "Upstream error" }, { status: upstream.status });
+      let message = "Upstream error";
+      if (data && typeof data === "object" && "error" in data) {
+        const errVal = (data as { error: unknown }).error;
+        if (typeof errVal === "string") message = errVal;
+      } else if (typeof data === "string" && data.trim()) {
+        message = data;
+      }
+      return NextResponse.json({ error: message }, { status: upstream.status });
     }
-    return NextResponse.json(data ?? { ok: true }, { status: upstream.status || 201 });
-  } catch (err: any) {
+    return NextResponse.json((data as object) ?? { ok: true }, { status: upstream.status || 201 });
+  } catch {
     return NextResponse.json({ error: "Failed to reach HCEN" }, { status: 502 });
   }
 }
