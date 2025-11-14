@@ -77,9 +77,10 @@ export default function HomeGuest() {
       setProfile(p);
       persistGuestCi(p.ci);
       setState("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setState("error");
-      setError(String(err?.message ?? err));
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
     }
   };
 

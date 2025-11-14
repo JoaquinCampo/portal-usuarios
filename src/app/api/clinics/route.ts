@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(data, { status: 200 });
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch clinics from backend" }, { status: 502 });
   }
 }

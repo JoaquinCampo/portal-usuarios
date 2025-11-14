@@ -63,10 +63,11 @@ export function AccessPolicyForms() {
           setClinicName((prev) => prev || clinicValue(normalized[0]));
           setWorkerClinicName((prev) => prev || clinicValue(normalized[0]));
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (!cancelled) {
           setClinics([]);
-          setClinicsError(error?.message ?? "No se pudieron cargar las clinicas");
+          const message = error instanceof Error ? error.message : String(error);
+          setClinicsError(message ?? "No se pudieron cargar las clinicas");
         }
       } finally {
         if (!cancelled) {
