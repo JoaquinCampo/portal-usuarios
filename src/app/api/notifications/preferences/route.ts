@@ -52,7 +52,6 @@ export async function POST(request: Request) {
   }
 
   const baseApi = resolveBaseApiUrl();
-  const target = `${baseApi}/notification-tokens/${enabled ? "subscribe" : "unsubscribe"}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -63,31 +62,34 @@ export async function POST(request: Request) {
   }
 
   try {
-    const upstream = await fetch(target, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ userCi: ci }),
-      cache: "no-store",
-    });
-
-    if (!upstream.ok) {
-      const text = await upstream.text();
-      let data: unknown = text;
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        data = text;
+    // Compose: subscribe/unsubscribe both types to emulate a global toggle
+    const types = ["ACCESS_REQUEST", "CLINICAL_HISTORY_ACCESS"]; 
+    for (const notificationType of types) {
+      const target = `${baseApi}/notification-tokens/${enabled ? "subscribe" : "unsubscribe"}`;
+      const resp = await fetch(target, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ userCi: ci, notificationType }),
+        cache: "no-store",
+      });
+      if (!resp.ok) {
+        const text = await resp.text();
+        let data: unknown = text;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch {
+          data = text;
+        }
+        return NextResponse.json(
+          {
+            error: "HCEN rejected the notification preference change.",
+            status: resp.status,
+            data,
+          },
+          { status: resp.status },
+        );
       }
-      return NextResponse.json(
-        {
-          error: "HCEN rejected the notification preference change.",
-          status: upstream.status,
-          data,
-        },
-        { status: upstream.status },
-      );
     }
-
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -118,7 +120,7 @@ export async function GET(request: Request) {
     headers.Authorization = authHeader;
   }
 
-  const target = `${baseApi}/notification-tokens/status/${encodeURIComponent(ci)}`;
+  const target = `${baseApi}/notification-tokens/subscription-preferences/${encodeURIComponent(ci)}`;
 
   try {
     const upstream = await fetch(target, {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 
 const BASE_URL = process.env.HCEN_API_BASE_URL ?? "http://localhost:8080";
 const BASIC_CREDENTIALS = process.env.HCEN_API_BASIC_AUTH ?? "admin:admin";
@@ -50,3 +50,4 @@ export async function GET(
     );
   }
 }
+
