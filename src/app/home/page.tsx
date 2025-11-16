@@ -21,61 +21,88 @@ export default async function HomePage() {
   
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader subtitle={subtitle} rightSlot={session ? <SignOutButton /> : <a href="/login" className="text-sm text-muted-foreground hover:text-foreground">Iniciar Sesión</a>} />
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
+      <AppHeader
+        subtitle={subtitle}
+        contactInfo={{ document: documentNumber, email }}
+        rightSlot={
+          session ? (
+            <SignOutButton />
+          ) : (
+            <a
+              href="/login"
+              className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
+            >
+              Iniciar Sesión
+            </a>
+          )
+        }
+      />
 
-      <main className="container mx-auto px-6 py-12 space-y-6">
-        <div className="rounded-lg border border-border bg-card/40 p-6 text-sm text-muted-foreground">
-          <p>
-            Acceso autorizado para la clinica {session.clinic.name}. Decision:
-            {` ${session.access.source} - ${session.access.message}`}
+      <main className="container mx-auto px-6 py-12 space-y-10">
+        <section className="rounded-3xl border border-border/60 bg-card/70 p-8 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+            Acceso autorizado
           </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-border bg-card p-5">
-            <h3 className="text-sm font-medium text-foreground">Documento</h3>
-            <p className="mt-1 text-lg text-muted-foreground">{documentNumber}</p>
+          <div className="mt-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Clínica {session.clinic.name}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {session.access.source} · {session.access.message}
+              </p>
+            </div>
           </div>
-          <div className="rounded-lg border border-border bg-card p-5">
-            <h3 className="text-sm font-medium text-foreground">Correo</h3>
-            <p className="mt-1 text-lg text-muted-foreground break-all">{email}</p>
+        </section>
+
+        <section className="space-y-6">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+              Gestiones disponibles
+            </p>
+            <h2 className="text-2xl font-semibold text-foreground">
+              Controla tus notificaciones y accesos
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Accede rápidamente a las funciones clave del portal.
+            </p>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          <OptionCard
-            title="Gestion de notificaciones"
-            description="Activa o desactiva el envio de notificaciones."
-            href="/notifications"
-            ctaLabel="Gestionar"
-            icon={<Bell className="h-4 w-4" />}
-          />
+          <div className="grid gap-5 md:grid-cols-2">
+            <OptionCard
+              title="Gestión de notificaciones"
+              description="Activa o desactiva el envío de notificaciones."
+              href="/notifications"
+              ctaLabel="Gestionar"
+              icon={<Bell className="h-5 w-5" />}
+            />
 
-          <OptionCard
-            title="Visualizacion de historia clinica"
-            description="Accede a documentos clinicos y sus detalles."
-            href="/clinical-history"
-            ctaLabel="Historia"
-            icon={<FileText className="h-4 w-4" />}
-          />
+            <OptionCard
+              title="Visualización de historia clínica"
+              description="Accede a documentos clínicos y sus detalles."
+              href="/clinical-history"
+              ctaLabel="Historia"
+              icon={<FileText className="h-5 w-5" />}
+            />
 
-          <OptionCard
-            title="Visualizacion de accesos"
-            description="Listado de accesos a documentos clinicos (ejemplo)."
-            href="/clinical-history-access"
-            ctaLabel="Accesos"
-            icon={<History className="h-4 w-4" />}
-          />
+            <OptionCard
+              title="Visualización de accesos"
+              description="Listado de accesos a documentos clínicos (ejemplo)."
+              href="/clinical-history-access"
+              ctaLabel="Accesos"
+              icon={<History className="h-5 w-5" />}
+            />
 
-          <OptionCard
-            title="Politicas de acceso"
-            description="Revisa y resuelve solicitudes de acceso a la historia clinica."
-            href="/access-policies"
-            ctaLabel="Ver politicas"
-            icon={<ShieldCheck className="h-4 w-4" />}
-          />
-        </div>
+            <OptionCard
+              title="Políticas de acceso"
+              description="Revisa y resuelve solicitudes de acceso a la historia clínica."
+              href="/access-policies"
+              ctaLabel="Ver políticas"
+              icon={<ShieldCheck className="h-5 w-5" />}
+            />
+          </div>
+        </section>
       </main>
     </div>
   );

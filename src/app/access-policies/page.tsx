@@ -70,6 +70,7 @@ export default async function AccessPoliciesPage() {
   const cookieStore = await cookies();
   const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
   const ci = session?.attributes?.numero_documento ?? session?.healthUser?.id ?? guestCi ?? null;
+  const email = session?.attributes?.email ?? session?.healthUser?.email ?? null;
 
   let clinicPolicies: ClinicAccessPolicy[] = [];
   let healthWorkerPolicies: HealthWorkerAccessPolicy[] = [];
@@ -97,7 +98,11 @@ export default async function AccessPoliciesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader subtitle="Gestion de politicas de acceso" rightSlot={<SignOutButton />} />
+      <AppHeader
+        subtitle="Gestion de politicas de acceso"
+        contactInfo={{ document: ci ?? undefined, email: email ?? undefined }}
+        rightSlot={<SignOutButton />}
+      />
       <main className="container mx-auto px-6 py-8 space-y-8">
         <section className="space-y-3 rounded-lg border bg-card p-4">
           <h2 className="text-base font-semibold">Configuracion rapida</h2>

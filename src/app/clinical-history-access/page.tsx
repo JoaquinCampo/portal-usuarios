@@ -121,11 +121,14 @@ export default function ClinicalHistoryAccessPage() {
     const ln = data?.healthUser?.lastName ?? "";
     return `${fn} ${ln}`.trim();
   }, [data]);
+  const documentValue = data?.healthUser?.ci ?? ci ?? undefined;
+  const emailValue = data?.healthUser?.email ?? undefined;
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader
         subtitle="Visualizacion de accesos a historia clinica"
+        contactInfo={{ document: documentValue, email: emailValue }}
         rightSlot={<SignOutButton />}
       />
       <main className="container mx-auto px-6 py-8">

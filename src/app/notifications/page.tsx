@@ -8,11 +8,13 @@ export default async function NotificationsPage() {
   const session = await readSession();
   const documentNumber =
     session?.attributes?.numero_documento ?? session?.healthUser?.id ?? null;
+  const email = session?.attributes?.email ?? session?.healthUser?.email ?? null;
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader
         subtitle="Gestion de notificaciones"
+        contactInfo={{ document: documentNumber ?? undefined, email: email ?? undefined }}
         rightSlot={
           session ? (
             <SignOutButton />
