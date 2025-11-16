@@ -6,7 +6,7 @@ import { readSession } from "@/lib/session";
 export default async function ClinicalHistoryPage() {
   const session = await readSession();
   const documentNumber = session?.attributes?.numero_documento ?? session?.healthUser?.id ?? null;
-  const email = session?.attributes?.email ?? session?.healthUser?.email ?? null;
+  const email = session?.attributes?.email ?? null;
 
   return (
     <div className="min-h-screen bg-background">

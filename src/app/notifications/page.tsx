@@ -8,7 +8,7 @@ export default async function NotificationsPage() {
   const session = await readSession();
   const documentNumber =
     session?.attributes?.numero_documento ?? session?.healthUser?.id ?? null;
-  const email = session?.attributes?.email ?? session?.healthUser?.email ?? null;
+  const email = session?.attributes?.email ?? null;
 
   return (
     <div className="min-h-screen bg-background">

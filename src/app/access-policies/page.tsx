@@ -70,7 +70,7 @@ export default async function AccessPoliciesPage() {
   const cookieStore = await cookies();
   const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
   const ci = session?.attributes?.numero_documento ?? session?.healthUser?.id ?? guestCi ?? null;
-  const email = session?.attributes?.email ?? session?.healthUser?.email ?? null;
+  const email = session?.attributes?.email ?? null;
 
   let clinicPolicies: ClinicAccessPolicy[] = [];
   let healthWorkerPolicies: HealthWorkerAccessPolicy[] = [];
