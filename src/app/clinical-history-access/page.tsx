@@ -5,6 +5,14 @@ import { History as HistoryIcon } from "lucide-react";
 
 import { AppHeader } from "@/app/_components/app-header";
 import { SignOutButton } from "@/app/_components/sign-out-button";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -15,7 +23,7 @@ import {
 } from "@/components/ui/table";
 
 type AccessLog = {
-  id: number;
+  id: string;
   healthUserCi: string;
   healthWorkerCi: string | null;
   clinicName: string | null;
@@ -36,6 +44,24 @@ type AccessHistoryResponse = {
   healthUser: HealthUser;
   accessHistory: AccessLog[];
 };
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
+
+const DECISION_REASON_LABELS: Record<string, string> = {
+  SELF_ACCESS: "Acceso propio",
+  BY_CLINIC: "Clínica autorizada",
+  BY_HEALTH_WORKER: "Profesional autorizado",
+  BY_SPECIALTY: "Especialidad autorizada",
+  UNKNOWN: "Motivo desconocido",
+};
+
+function formatDecisionReason(reason?: string | null): string {
+  if (!reason) {
+    return "-";
+  }
+  const label = DECISION_REASON_LABELS[reason as keyof typeof DECISION_REASON_LABELS];
+  return label ?? reason;
+}
 
 function parseCookieCi(): string | null {
   try {
@@ -72,6 +98,9 @@ export default function ClinicalHistoryAccessPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AccessHistoryResponse | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState<(typeof PAGE_SIZE_OPTIONS)[number]>(20);
+  const [lastFetchedCount, setLastFetchedCount] = useState(0);
 
   useEffect(() => {
     // Obtain CI from cookie first, fallback to localStorage
@@ -82,13 +111,26 @@ export default function ClinicalHistoryAccessPage() {
   }, []);
 
   useEffect(() => {
-    if (!ci) return;
+    // Reset pagination whenever the detected CI changes
+    setPageIndex(0);
+  }, [ci]);
+
+  useEffect(() => {
+    if (!ci) {
+      return;
+    }
     const controller = new AbortController();
     const run = async () => {
       setLoading(true);
       setError(null);
+      setLastFetchedCount(0);
       try {
-        const resp = await fetch(`/api/clinical-history-access?ci=${encodeURIComponent(ci)}`, {
+        const params = new URLSearchParams({
+          ci,
+          pageIndex: pageIndex.toString(),
+          pageSize: pageSize.toString(),
+        });
+        const resp = await fetch(`/api/clinical-history-access?${params.toString()}`, {
           method: "GET",
           cache: "no-store",
           signal: controller.signal,
@@ -100,6 +142,8 @@ export default function ClinicalHistoryAccessPage() {
           return;
         }
         setData(json as AccessHistoryResponse);
+        const history = (json as AccessHistoryResponse)?.accessHistory ?? [];
+        setLastFetchedCount(history.length);
       } catch (e: unknown) {
         // In browsers, aborting fetch may throw a DOMException with name 'AbortError'
         if (typeof e === "object" && e !== null && "name" in e && (e as { name?: unknown }).name === "AbortError") {
@@ -113,7 +157,7 @@ export default function ClinicalHistoryAccessPage() {
     };
     run();
     return () => controller.abort();
-  }, [ci]);
+  }, [ci, pageIndex, pageSize]);
 
   const access = useMemo(() => data?.accessHistory ?? [], [data]);
   const fullName = useMemo(() => {
@@ -123,6 +167,8 @@ export default function ClinicalHistoryAccessPage() {
   }, [data]);
   const documentValue = data?.healthUser?.ci ?? ci ?? undefined;
   const emailValue = data?.healthUser?.email ?? undefined;
+  const hasNextPage = !loading && lastFetchedCount === pageSize && access.length === pageSize;
+  const hasPreviousPage = !loading && pageIndex > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,7 +216,7 @@ export default function ClinicalHistoryAccessPage() {
                   <TableCell className="text-foreground">{entry.healthWorkerCi ?? "-"}</TableCell>
                   <TableCell className="text-foreground">{entry.clinicName ?? "-"}</TableCell>
                   <TableCell className="text-foreground">{entry.viewed ? "Sí" : "No"}</TableCell>
-                  <TableCell className="text-foreground">{entry.decisionReason ?? "-"}</TableCell>
+                  <TableCell className="text-foreground">{formatDecisionReason(entry.decisionReason)}</TableCell>
                 </TableRow>
               );
             })}
@@ -181,6 +227,50 @@ export default function ClinicalHistoryAccessPage() {
             )}
           </TableBody>
         </Table>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span>Tamaño de página:</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(value) => {
+                const numericValue = Number.parseInt(value, 10) as (typeof PAGE_SIZE_OPTIONS)[number];
+                setPageSize(numericValue);
+                setPageIndex(0);
+              }}
+            >
+              <SelectTrigger size="sm" aria-label="Seleccionar tamaño de página">
+                <SelectValue placeholder="Seleccionar" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZE_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option.toString()}>
+                    {option} registros
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>Página {pageIndex + 1}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
+              disabled={!hasPreviousPage}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((prev) => prev + 1)}
+              disabled={!hasNextPage}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
       </main>
     </div>
   );

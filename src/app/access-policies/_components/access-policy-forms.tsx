@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatHcenError } from "@/lib/hcen-connectivity";
 
 interface Feedback {
   ok: boolean;
@@ -85,7 +86,7 @@ export function AccessPolicyForms() {
       try {
         const res = await fetch("/api/clinics", { cache: "no-store" });
         if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          throw new Error(formatHcenError(res.status, undefined, `HTTP ${res.status}`));
         }
         const data = (await res.json()) as ClinicOption[];
         if (cancelled) return;
@@ -99,7 +100,7 @@ export function AccessPolicyForms() {
         if (!cancelled) {
           setClinics([]);
           const message = error instanceof Error ? error.message : String(error);
-          setClinicsError(message ?? "No se pudieron cargar las clinicas");
+          setClinicsError(formatHcenError(undefined, message, "No se pudieron cargar las clinicas"));
         }
       } finally {
         if (!cancelled) {
@@ -131,7 +132,7 @@ export function AccessPolicyForms() {
           cache: "no-store",
         });
         if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          throw new Error(formatHcenError(res.status, undefined, `HTTP ${res.status}`));
         }
         const data = (await res.json()) as RawHealthWorkerOption[];
         if (cancelled) return;
@@ -164,7 +165,9 @@ export function AccessPolicyForms() {
           setHealthWorkers([]);
           setSelectedWorkerCi("");
           const message = error instanceof Error ? error.message : String(error);
-          setHealthWorkersError(message ?? "No se pudieron cargar los profesionales");
+          setHealthWorkersError(
+            formatHcenError(undefined, message, "No se pudieron cargar los profesionales"),
+          );
         }
       } finally {
         if (!cancelled) {

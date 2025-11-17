@@ -15,6 +15,7 @@ import {
 } from "@/lib/access-policies";
 import { readSession } from "@/lib/session";
 import { GUEST_CI_COOKIE_NAME } from "@/lib/cookie-names";
+import { formatHcenError } from "@/lib/hcen-connectivity";
 
 function sanitizeString(v: unknown): string | undefined {
   if (typeof v !== "string") return undefined;
@@ -38,7 +39,7 @@ export async function submitClinicAccessPolicy(_prevState: unknown, formData: Fo
 
   const res = await createClinicAccessPolicy(payload);
   if (!res.ok) {
-    return { ok: false, message: res.error || "No se pudo crear" };
+    return { ok: false, message: formatHcenError(res.status, res.error, "No se pudo crear") };
   }
   revalidatePath("/access-policies");
   return { ok: true, message: "Solicitud hecha correctamente" };
@@ -62,7 +63,7 @@ export async function submitHealthWorkerAccessPolicy(_prevState: unknown, formDa
 
   const res = await createHealthWorkerAccessPolicy(payload);
   if (!res.ok) {
-    return { ok: false, message: res.error || "No se pudo crear" };
+    return { ok: false, message: formatHcenError(res.status, res.error, "No se pudo crear") };
   }
   revalidatePath("/access-policies");
   return { ok: true, message: "Solicitud hecha correctamente" };
@@ -84,7 +85,7 @@ export async function submitSpecialtyAccessPolicy(_prevState: unknown, formData:
 
   const res = await createSpecialtyAccessPolicy(payload);
   if (!res.ok) {
-    return { ok: false, message: res.error || "No se pudo crear" };
+    return { ok: false, message: formatHcenError(res.status, res.error, "No se pudo crear") };
   }
   revalidatePath("/access-policies");
   return { ok: true, message: "Solicitud hecha correctamente" };
@@ -98,7 +99,7 @@ export async function deleteClinicAccessPolicyAction(formData: FormData): Promis
 
   const res = await deleteClinicAccessPolicyById(policyId);
   if (!res.ok) {
-    throw new Error(res.error || "No se pudo eliminar la politica de clinica");
+    throw new Error(formatHcenError(res.status, res.error, "No se pudo eliminar la politica de clinica"));
   }
 
   revalidatePath("/access-policies");
@@ -112,7 +113,7 @@ export async function deleteHealthWorkerAccessPolicyAction(formData: FormData): 
 
   const res = await deleteHealthWorkerAccessPolicyById(policyId);
   if (!res.ok) {
-    throw new Error(res.error || "No se pudo eliminar la politica de profesional");
+    throw new Error(formatHcenError(res.status, res.error, "No se pudo eliminar la politica de profesional"));
   }
 
   revalidatePath("/access-policies");
@@ -126,7 +127,7 @@ export async function deleteSpecialtyAccessPolicyAction(formData: FormData): Pro
 
   const res = await deleteSpecialtyAccessPolicyById(policyId);
   if (!res.ok) {
-    throw new Error(res.error || "No se pudo eliminar la politica de especialidad");
+    throw new Error(formatHcenError(res.status, res.error, "No se pudo eliminar la politica de especialidad"));
   }
 
   revalidatePath("/access-policies");

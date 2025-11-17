@@ -13,6 +13,32 @@ export async function GET(request: Request) {
     );
   }
 
+  const parseIntegerParam = (
+    name: string,
+    fallback: number,
+    options?: { min?: number; max?: number }
+  ): number => {
+    const raw = url.searchParams.get(name);
+    if (!raw) {
+      return fallback;
+    }
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed)) {
+      return fallback;
+    }
+    let value = parsed;
+    if (options?.min !== undefined && value < options.min) {
+      value = options.min;
+    }
+    if (options?.max !== undefined && value > options.max) {
+      value = options.max;
+    }
+    return value;
+  };
+
+  const pageIndex = parseIntegerParam("pageIndex", 0, { min: 0 });
+  const pageSize = parseIntegerParam("pageSize", 20, { min: 1, max: 100 });
+
   // Prefer explicit HCEN_API_URL if provided, else derive from HCEN_API_URL
   const baseFromLegacy = process.env.HCEN_API_URL
     ? `${process.env.HCEN_API_URL.replace(/\/$/, "")}/api`
@@ -31,7 +57,7 @@ export async function GET(request: Request) {
 
   const target = `${baseUrl}/clinical-history/health-users/${encodeURIComponent(
     ci
-  )}/access-history`;
+  )}/access-history?pageIndex=${pageIndex}&pageSize=${pageSize}`;
 
   try {
     const resp = await fetch(target, {

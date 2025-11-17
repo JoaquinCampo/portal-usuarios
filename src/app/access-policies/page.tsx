@@ -12,10 +12,12 @@ import {
   listClinicAccessPolicies,
   listHealthWorkerAccessPolicies,
   listSpecialtyAccessPolicies,
+  type ApiResult,
   type ClinicAccessPolicy,
   type HealthWorkerAccessPolicy,
   type SpecialtyAccessPolicy,
 } from "@/lib/access-policies";
+import { formatHcenError } from "@/lib/hcen-connectivity";
 import {
   deleteClinicAccessPolicyAction,
   deleteHealthWorkerAccessPolicyAction,
@@ -45,6 +47,11 @@ function workerLabel(worker?: HealthWorkerAccessPolicy["healthWorker"] | null) {
 
 function specialtyLabel(policy: SpecialtyAccessPolicy) {
   return policy.specialtyName || "Especialidad sin datos";
+}
+
+function formatAccessPolicyError(result?: Pick<ApiResult, "status" | "error">) {
+  if (!result) return "Error desconocido";
+  return formatHcenError(result.status, result.error);
 }
 
 type SectionProps<T> = {
@@ -99,19 +106,19 @@ export default async function AccessPoliciesPage() {
     if (clinicResult.ok && clinicResult.data) {
       clinicPolicies = clinicResult.data;
     } else if (!clinicResult.ok) {
-      clinicError = clinicResult.error ?? `HTTP ${clinicResult.status}`;
+      clinicError = formatAccessPolicyError(clinicResult);
     }
 
     if (workerResult.ok && workerResult.data) {
       healthWorkerPolicies = workerResult.data;
     } else if (!workerResult.ok) {
-      workerError = workerResult.error ?? `HTTP ${workerResult.status}`;
+      workerError = formatAccessPolicyError(workerResult);
     }
 
     if (specialtyResult.ok && specialtyResult.data) {
       specialtyPolicies = specialtyResult.data;
     } else if (!specialtyResult.ok) {
-      specialtyError = specialtyResult.error ?? `HTTP ${specialtyResult.status}`;
+      specialtyError = formatAccessPolicyError(specialtyResult);
     }
   }
 

@@ -16,7 +16,7 @@ export default async function ClinicalHistoryPage() {
         rightSlot={<SignOutButton />}
       />
       <main className="container mx-auto px-6 py-8">
-        <ClinicalHistorySearch />
+        <ClinicalHistorySearch ci={documentNumber ?? undefined} />
       </main>
     </div>
   );
