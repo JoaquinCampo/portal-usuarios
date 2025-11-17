@@ -1,5 +1,29 @@
 import { NextResponse } from "next/server";
 
+const DEFAULT_API_BASE = "http://localhost:8080/api";
+
+function normalizeBaseUrl(input?: string | null): string {
+  const trimmed = (input && input.trim().length ? input.trim() : DEFAULT_API_BASE).replace(/\/$/, "");
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+}
+
+function buildQueryString(params: Record<string, string | undefined>, specialties: string[]): string {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value && value.length) {
+      search.append(key, value);
+    }
+  });
+  specialties.forEach((name) => {
+    const trimmed = name.trim();
+    if (trimmed.length) {
+      search.append("specialtyNames", trimmed);
+    }
+  });
+  const serialized = search.toString();
+  return serialized ? `?${serialized}` : "";
+}
+
 // Server-only handler to proxy clinical history requests to HCEN
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -12,31 +36,28 @@ export async function GET(request: Request) {
     );
   }
 
-  // Prefer explicit HCEN_API_URL if provided, else derive from HCEN_API_URL
-  const baseFromLegacy = process.env.HCEN_API_URL
-    ? `${process.env.HCEN_API_URL.replace(/\/$/, "")}/api`
-    : undefined;
-  const baseUrl =
-    process.env.HCEN_API_URL || baseFromLegacy || "http://localhost:8080/api";
-  const clinicName = process.env.HCEN_CLINIC_NAME;
-  const healthWorkerCi = process.env.HCEN_HEALTH_WORKER_CI;
+  const baseUrl = normalizeBaseUrl(process.env.HCEN_API_URL);
+  const clinicName = process.env.HCEN_CLINIC_NAME ?? url.searchParams.get("clinicName") ?? undefined;
+  const healthWorkerCi =
+    process.env.HCEN_HEALTH_WORKER_CI ?? url.searchParams.get("healthWorkerCi") ?? undefined;
+  const specialtyFromEnv = process.env.HCEN_SPECIALTY_NAMES
+    ? process.env.HCEN_SPECIALTY_NAMES.split(",")
+    : [];
+  const specialtyFromQuery = url.searchParams.getAll("specialtyNames");
+  const specialtyNames = specialtyFromQuery.length ? specialtyFromQuery : specialtyFromEnv;
   const basicUser = process.env.HCEN_BASIC_AUTH_USER || "admin";
   const basicPass = process.env.HCEN_BASIC_AUTH_PASS || "admin";
+  const authHeader = `Basic ${Buffer.from(`${basicUser}:${basicPass}`, "utf8").toString("base64")}`;
 
-  if (!clinicName || !healthWorkerCi) {
-    return NextResponse.json(
-      { error: "Server not configured: set HCEN_CLINIC_NAME and HCEN_HEALTH_WORKER_CI env vars" },
-      { status: 500 }
-    );
-  }
+  const queryString = buildQueryString(
+    {
+      clinicName,
+      healthWorkerCi,
+    },
+    specialtyNames
+  );
 
-  const authHeader = `Basic ${Buffer.from(`${basicUser}:${basicPass}`).toString("base64")}`;
-
-  const target = `${baseUrl.replace(/\/$/, "")}/health-users/${encodeURIComponent(
-    ci
-  )}/clinical-history?clinicName=${encodeURIComponent(clinicName)}&healthWorkerCi=${encodeURIComponent(
-    healthWorkerCi
-  )}`;
+  const target = `${baseUrl}/clinical-history/${encodeURIComponent(ci)}${queryString}`;
 
   try {
     const resp = await fetch(target, {
@@ -45,7 +66,6 @@ export async function GET(request: Request) {
         Accept: "application/json",
         Authorization: authHeader,
       },
-      // Avoid Next.js fetch caching for dynamic data
       cache: "no-store",
     });
 
