@@ -7,7 +7,7 @@ import { SignOutButton } from "@/app/_components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { AccessPolicyForms } from "./_components/access-policy-forms";
 import { readSession } from "@/lib/session";
-import { GUEST_CI_COOKIE_NAME } from "@/lib/cookie-names";
+import { GUEST_CI_COOKIE_NAME, GUEST_PROFILE_COOKIE_NAME } from "@/lib/cookie-names";
 import {
   listClinicAccessPolicies,
   listHealthWorkerAccessPolicies,
@@ -18,6 +18,7 @@ import {
   type SpecialtyAccessPolicy,
 } from "@/lib/access-policies";
 import { formatHcenError } from "@/lib/hcen-connectivity";
+import { parseGuestProfileCookie } from "@/lib/guest-cookie";
 import {
   deleteClinicAccessPolicyAction,
   deleteHealthWorkerAccessPolicyAction,
@@ -86,8 +87,14 @@ export default async function AccessPoliciesPage() {
   const session = await readSession();
   const cookieStore = await cookies();
   const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
-  const ci = session?.attributes?.numero_documento ?? session?.healthUser?.id ?? guestCi ?? null;
-  const email = session?.attributes?.email ?? null;
+  const guestProfile = parseGuestProfileCookie(cookieStore.get(GUEST_PROFILE_COOKIE_NAME)?.value);
+  const ci =
+    session?.attributes?.numero_documento ??
+    session?.healthUser?.id ??
+    guestProfile?.ci ??
+    guestCi ??
+    null;
+  const email = session?.attributes?.email ?? guestProfile?.email ?? null;
 
   let clinicPolicies: ClinicAccessPolicy[] = [];
   let healthWorkerPolicies: HealthWorkerAccessPolicy[] = [];

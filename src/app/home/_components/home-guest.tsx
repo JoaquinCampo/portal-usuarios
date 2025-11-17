@@ -5,12 +5,24 @@ import { Bell, FileText, History, ShieldCheck } from "lucide-react";
 import { AppHeader } from "@/app/_components/app-header";
 import { OptionCard } from "../_components/option-card";
 
-export default function HomeGuest() {
+interface HomeGuestProps {
+  guestName?: string;
+  contactInfo?: {
+    document?: string;
+    email?: string;
+  };
+}
+
+export default function HomeGuest({ guestName, contactInfo }: HomeGuestProps) {
+  const subtitleName = guestName?.trim() || "Invitado";
+  const documentValue = contactInfo?.document ?? "No disponible";
+  const emailValue = contactInfo?.email ?? "No disponible";
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
       <AppHeader
-        subtitle="Bienvenido Invitado."
-        contactInfo={{ document: "No disponible", email: "No disponible" }}
+        subtitle={`Bienvenido ${subtitleName}.`}
+        contactInfo={{ document: documentValue, email: emailValue }}
         rightSlot={
           <a
             href="/login"

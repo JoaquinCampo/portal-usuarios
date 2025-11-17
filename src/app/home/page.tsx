@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+
+import { cookies } from "next/headers";
 import { Bell, FileText, History, ShieldCheck } from "lucide-react";
 
 import { AppHeader } from "@/app/_components/app-header";
@@ -5,19 +8,38 @@ import { SignOutButton } from "@/app/_components/sign-out-button";
 import { OptionCard } from "./_components/option-card";
 import { readSession } from "@/lib/session";
 import HomeGuest from "./_components/home-guest";
+import { GUEST_CI_COOKIE_NAME, GUEST_PROFILE_COOKIE_NAME } from "@/lib/cookie-names";
+import { parseGuestProfileCookie } from "@/lib/guest-cookie";
 
 export default async function HomePage() {
   const session = await readSession();
+  const cookieStore = await cookies();
+  const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value ?? null;
+  const guestProfile = parseGuestProfileCookie(cookieStore.get(GUEST_PROFILE_COOKIE_NAME)?.value);
+  const guestDocument = guestProfile?.ci ?? guestCi ?? undefined;
+  const guestEmail = guestProfile?.email ?? undefined;
+  const guestName = [guestProfile?.firstName, guestProfile?.lastName]
+    .filter((value) => Boolean(value?.trim()))
+    .join(" ")
+    .trim();
 
   if (!session) {
-    // Modo invitado completo en componente cliente
-    return <HomeGuest />;
+    // Modo invitado completo con datos persistidos del navegador
+    return (
+      <HomeGuest
+        guestName={guestName || undefined}
+        contactInfo={{
+          document: guestDocument,
+          email: guestEmail,
+        }}
+      />
+    );
   }
 
   const subtitle = `Bienvenido ${session.healthUser.name}.`;
   const attributes = session.attributes ?? {};
-  const documentNumber = attributes.numero_documento ?? session.healthUser.id;
-  const email = attributes.email ?? "No disponible";
+  const documentNumber = attributes.numero_documento ?? session.healthUser.id ?? guestDocument;
+  const email = attributes.email ?? guestEmail ?? "No disponible";
   
 
   return (

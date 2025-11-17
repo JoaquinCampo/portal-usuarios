@@ -241,7 +241,7 @@ export function ClinicalHistorySearch({ ci }: ClinicalHistorySearchProps) {
             ) : (
               <tr>
                 <td className="h-24 text-center p-2" colSpan={5}>
-                  {healthUser ? "No hay registros de acceso." : "Necesitamos tu cédula para mostrar tu historial."}
+                  {healthUser ? "No hay registros." : "Necesitamos tu cédula para mostrar tu historial."}
                 </td>
               </tr>
             )}
