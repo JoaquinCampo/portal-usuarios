@@ -11,10 +11,16 @@ import { GUEST_CI_COOKIE_NAME } from "@/lib/cookie-names";
 import {
   listClinicAccessPolicies,
   listHealthWorkerAccessPolicies,
+  listSpecialtyAccessPolicies,
   type ClinicAccessPolicy,
   type HealthWorkerAccessPolicy,
+  type SpecialtyAccessPolicy,
 } from "@/lib/access-policies";
-import { deleteClinicAccessPolicyAction, deleteHealthWorkerAccessPolicyAction } from "./actions";
+import {
+  deleteClinicAccessPolicyAction,
+  deleteHealthWorkerAccessPolicyAction,
+  deleteSpecialtyAccessPolicyAction,
+} from "./actions";
 
 function formatDate(value?: string) {
   if (!value) return undefined;
@@ -35,6 +41,10 @@ function workerLabel(worker?: HealthWorkerAccessPolicy["healthWorker"] | null) {
     return worker.ci ? `${fullName} (CI ${worker.ci})` : fullName;
   }
   return worker.ci ? `CI ${worker.ci}` : "Profesional sin datos";
+}
+
+function specialtyLabel(policy: SpecialtyAccessPolicy) {
+  return policy.specialtyName || "Especialidad sin datos";
 }
 
 type SectionProps<T> = {
@@ -74,13 +84,16 @@ export default async function AccessPoliciesPage() {
 
   let clinicPolicies: ClinicAccessPolicy[] = [];
   let healthWorkerPolicies: HealthWorkerAccessPolicy[] = [];
+  let specialtyPolicies: SpecialtyAccessPolicy[] = [];
   let clinicError: string | undefined;
   let workerError: string | undefined;
+  let specialtyError: string | undefined;
 
   if (ci) {
-    const [clinicResult, workerResult] = await Promise.all([
+    const [clinicResult, workerResult, specialtyResult] = await Promise.all([
       listClinicAccessPolicies(ci),
       listHealthWorkerAccessPolicies(ci),
+      listSpecialtyAccessPolicies(ci),
     ]);
 
     if (clinicResult.ok && clinicResult.data) {
@@ -93,6 +106,12 @@ export default async function AccessPoliciesPage() {
       healthWorkerPolicies = workerResult.data;
     } else if (!workerResult.ok) {
       workerError = workerResult.error ?? `HTTP ${workerResult.status}`;
+    }
+
+    if (specialtyResult.ok && specialtyResult.data) {
+      specialtyPolicies = specialtyResult.data;
+    } else if (!specialtyResult.ok) {
+      specialtyError = specialtyResult.error ?? `HTTP ${specialtyResult.status}`;
     }
   }
 
@@ -119,7 +138,7 @@ export default async function AccessPoliciesPage() {
               <p className="text-lg font-semibold">{ci}</p>
             </header>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <PoliciesSection
                 title="Politicas para clinicas"
                 emptyMessage="No hay clinicas habilitadas."
@@ -162,6 +181,30 @@ export default async function AccessPoliciesPage() {
                     </div>
                     <form action={deleteHealthWorkerAccessPolicyAction} className="flex justify-end">
                       <input type="hidden" name="healthWorkerAccessPolicyId" value={policy.id} />
+                      <Button type="submit" variant="destructive" size="sm">
+                        Eliminar
+                      </Button>
+                    </form>
+                  </li>
+                )}
+              />
+
+              <PoliciesSection
+                title="Politicas por especialidad"
+                emptyMessage="No hay especialidades habilitadas."
+                error={specialtyError}
+                policies={specialtyPolicies}
+                renderItem={(policy) => (
+                  <li key={policy.id} className="rounded-md border p-3 space-y-2">
+                    <div>
+                      <p className="font-medium">{specialtyLabel(policy)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        ID politica: {policy.id}
+                        {policy.createdAt ? ` - Creada ${formatDate(policy.createdAt)}` : null}
+                      </p>
+                    </div>
+                    <form action={deleteSpecialtyAccessPolicyAction} className="flex justify-end">
+                      <input type="hidden" name="specialtyAccessPolicyId" value={policy.id} />
                       <Button type="submit" variant="destructive" size="sm">
                         Eliminar
                       </Button>

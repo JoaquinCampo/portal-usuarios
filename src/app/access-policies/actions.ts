@@ -7,8 +7,11 @@ import {
   createHealthWorkerAccessPolicy,
   deleteClinicAccessPolicyById,
   deleteHealthWorkerAccessPolicyById,
+  createSpecialtyAccessPolicy,
+  deleteSpecialtyAccessPolicyById,
   type AddClinicAccessPolicyPayload,
   type AddHealthWorkerAccessPolicyPayload,
+  type AddSpecialtyAccessPolicyPayload,
 } from "@/lib/access-policies";
 import { readSession } from "@/lib/session";
 import { GUEST_CI_COOKIE_NAME } from "@/lib/cookie-names";
@@ -65,6 +68,28 @@ export async function submitHealthWorkerAccessPolicy(_prevState: unknown, formDa
   return { ok: true, message: "Solicitud hecha correctamente" };
 }
 
+export async function submitSpecialtyAccessPolicy(_prevState: unknown, formData: FormData) {
+  const session = await readSession();
+  const cookieStore = await cookies();
+  const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
+  const ci = session?.attributes?.numero_documento ?? session?.healthUser?.id ?? guestCi ?? undefined;
+
+  const payload: AddSpecialtyAccessPolicyPayload = {
+    healthUserCi: ci!,
+    specialtyName: sanitizeString(formData.get("specialtyName"))!,
+  };
+
+  if (!payload.healthUserCi) return { ok: false, message: "No se encontró CI en la sesión" };
+  if (!payload.specialtyName) return { ok: false, message: "Nombre de la especialidad es requerido" };
+
+  const res = await createSpecialtyAccessPolicy(payload);
+  if (!res.ok) {
+    return { ok: false, message: res.error || "No se pudo crear" };
+  }
+  revalidatePath("/access-policies");
+  return { ok: true, message: "Solicitud hecha correctamente" };
+}
+
 export async function deleteClinicAccessPolicyAction(formData: FormData): Promise<void> {
   const policyId = sanitizeString(formData.get("clinicAccessPolicyId"));
   if (!policyId) {
@@ -88,6 +113,20 @@ export async function deleteHealthWorkerAccessPolicyAction(formData: FormData): 
   const res = await deleteHealthWorkerAccessPolicyById(policyId);
   if (!res.ok) {
     throw new Error(res.error || "No se pudo eliminar la politica de profesional");
+  }
+
+  revalidatePath("/access-policies");
+}
+
+export async function deleteSpecialtyAccessPolicyAction(formData: FormData): Promise<void> {
+  const policyId = sanitizeString(formData.get("specialtyAccessPolicyId"));
+  if (!policyId) {
+    throw new Error("ID de la politica de especialidad es requerido");
+  }
+
+  const res = await deleteSpecialtyAccessPolicyById(policyId);
+  if (!res.ok) {
+    throw new Error(res.error || "No se pudo eliminar la politica de especialidad");
   }
 
   revalidatePath("/access-policies");

@@ -58,9 +58,6 @@ export default async function HomePage() {
 
         <section className="space-y-6">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-              Gestiones disponibles
-            </p>
             <h2 className="text-2xl font-semibold text-foreground">
               Controla tus notificaciones y accesos
             </h2>
@@ -75,7 +72,7 @@ export default async function HomePage() {
               description="Activa o desactiva el envío de notificaciones."
               href="/notifications"
               ctaLabel="Gestionar"
-              icon={<Bell className="h-5 w-5" />}
+              icon={<Bell className="h-10 w-10" />}
             />
 
             <OptionCard
@@ -83,23 +80,23 @@ export default async function HomePage() {
               description="Accede a documentos clínicos y sus detalles."
               href="/clinical-history"
               ctaLabel="Historia"
-              icon={<FileText className="h-5 w-5" />}
+              icon={<FileText className="h-10 w-10" />}
             />
 
             <OptionCard
               title="Visualización de accesos"
-              description="Listado de accesos a documentos clínicos (ejemplo)."
+              description="Listado de accesos a documentos clínicos."
               href="/clinical-history-access"
               ctaLabel="Accesos"
-              icon={<History className="h-5 w-5" />}
+              icon={<History className="h-10 w-10" />}
             />
 
             <OptionCard
               title="Políticas de acceso"
               description="Revisa y resuelve solicitudes de acceso a la historia clínica."
               href="/access-policies"
-              ctaLabel="Ver políticas"
-              icon={<ShieldCheck className="h-5 w-5" />}
+              ctaLabel="Políticas"
+              icon={<ShieldCheck className="h-10 w-10" />}
             />
           </div>
         </section>

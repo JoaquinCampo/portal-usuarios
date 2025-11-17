@@ -23,6 +23,12 @@ export interface AddHealthWorkerAccessPolicyPayload {
   accessRequestId?: string | null;
 }
 
+export interface AddSpecialtyAccessPolicyPayload {
+  healthUserCi: string;
+  specialtyName: string;
+  accessRequestId?: string | null;
+}
+
 export interface ApiResult<T = unknown> {
   ok: boolean;
   status: number;
@@ -58,6 +64,13 @@ export interface HealthWorkerAccessPolicy {
   healthUserId: string;
   healthWorker?: HealthWorkerSummary | null;
   clinic?: ClinicSummary | null;
+  createdAt?: string;
+}
+
+export interface SpecialtyAccessPolicy {
+  id: string;
+  healthUserCi: string;
+  specialtyName: string;
   createdAt?: string;
 }
 
@@ -150,4 +163,27 @@ export async function deleteClinicAccessPolicyById(policyId: string) {
 
 export async function deleteHealthWorkerAccessPolicyById(policyId: string) {
   return deleteJson(`${ACCESS_POLICIES_BASE}/health-worker/${encodeURIComponent(policyId)}`);
+}
+
+export async function createSpecialtyAccessPolicy(payload: AddSpecialtyAccessPolicyPayload): Promise<ApiResult> {
+  return postJson(`${ACCESS_POLICIES_BASE}/specialty`, payload);
+}
+
+export async function listSpecialtyAccessPolicies(healthUserCi: string) {
+  return getJson<SpecialtyAccessPolicy[]>(
+    `${ACCESS_POLICIES_BASE}/specialty/health-user/${encodeURIComponent(healthUserCi)}`,
+  );
+}
+
+export async function deleteSpecialtyAccessPolicyById(policyId: string) {
+  return deleteJson(`${ACCESS_POLICIES_BASE}/specialty/${encodeURIComponent(policyId)}`);
+}
+
+export async function hasSpecialtyAccess(healthUserCi: string, specialtyNames: string[]) {
+  const params = new URLSearchParams();
+  params.set("healthUserCi", healthUserCi);
+  specialtyNames.forEach((name) => params.append("specialtyNames", name));
+  return getJson<{ hasAccess: boolean }>(
+    `${ACCESS_POLICIES_BASE}/specialty/check-access?${params.toString()}`,
+  );
 }
