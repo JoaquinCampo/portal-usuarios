@@ -21,8 +21,14 @@ type ClinicOption = {
   name?: string;
 };
 
+type RawHealthWorkerOption = {
+  ci?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+};
+
 type HealthWorkerOption = {
-  ci?: string;
+  ci: string;
   firstName?: string;
   lastName?: string;
 };
@@ -127,17 +133,24 @@ export function AccessPolicyForms() {
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
-        const data = (await res.json()) as HealthWorkerOption[];
+        const data = (await res.json()) as RawHealthWorkerOption[];
         if (cancelled) return;
         const normalized = Array.isArray(data)
-          ? data
-              .map((worker) => {
-                if (!worker || typeof worker.ci !== "string") return null;
-                const ci = worker.ci.trim();
-                if (!ci) return null;
-                return { ...worker, ci };
-              })
-              .filter((worker): worker is HealthWorkerOption => Boolean(worker))
+          ? data.reduce<HealthWorkerOption[]>((acc, worker) => {
+              if (!worker || typeof worker.ci !== "string") {
+                return acc;
+              }
+              const ci = worker.ci.trim();
+              if (!ci) {
+                return acc;
+              }
+              acc.push({
+                ci,
+                firstName: worker.firstName ?? undefined,
+                lastName: worker.lastName ?? undefined,
+              });
+              return acc;
+            }, [])
           : [];
         setHealthWorkers(normalized);
         setSelectedWorkerCi((prev) => {
