@@ -9,7 +9,7 @@ function resolveBaseApiUrl(): string {
   const legacy = process.env.HCEN_API_URL
     ? `${process.env.HCEN_API_URL.replace(/\/$/, "")}/api`
     : undefined;
-  const base = process.env.HCEN_API_BASE_URL || legacy || "http://localhost:8080/api";
+  const base = process.env.HCEN_API_URL || legacy || "http://localhost:8080/api";
   return base.replace(/\/$/, "");
 }
 

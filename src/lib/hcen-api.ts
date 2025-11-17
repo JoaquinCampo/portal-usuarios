@@ -1,6 +1,6 @@
 export function resolveBaseApiUrl(): string {
   const legacy = process.env.HCEN_API_URL ? `${process.env.HCEN_API_URL.replace(/\/$/, "")}/api` : undefined;
-  let base = process.env.HCEN_API_BASE_URL || legacy || "http://localhost:8080/api";
+  let base = process.env.HCEN_API_URL || legacy || "http://localhost:8080/api";
   // Ensure base contains the /api segment so upstream paths are correct even if env var omitted it
   base = base.replace(/\/$/, "");
   if (!base.endsWith("/api")) {

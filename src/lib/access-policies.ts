@@ -1,7 +1,7 @@
 // Helper para interactuar con los endpoints de HCEN relacionados a politicas de acceso.
 // Usa BASIC auth configurable via variables de entorno como cualquier otro cliente del portal.
 
-const HCEN_BASE_URL = process.env.HCEN_API_BASE_URL ?? "http://localhost:8080";
+const HCEN_BASE_URL = process.env.HCEN_API_URL ?? "http://localhost:8080";
 const HCEN_BASIC_CREDENTIALS = process.env.HCEN_API_BASIC_AUTH ?? "admin:admin";
 const ACCESS_POLICIES_BASE = "/api/access-policies";
 

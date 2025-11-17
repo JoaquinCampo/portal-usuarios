@@ -12,12 +12,12 @@ export async function GET(request: Request) {
     );
   }
 
-  // Prefer explicit HCEN_API_BASE_URL if provided, else derive from HCEN_API_URL
+  // Prefer explicit HCEN_API_URL if provided, else derive from HCEN_API_URL
   const baseFromLegacy = process.env.HCEN_API_URL
     ? `${process.env.HCEN_API_URL.replace(/\/$/, "")}/api`
     : undefined;
   const baseUrl =
-    process.env.HCEN_API_BASE_URL || baseFromLegacy || "http://localhost:8080/api";
+    process.env.HCEN_API_URL || baseFromLegacy || "http://localhost:8080/api";
   const clinicName = process.env.HCEN_CLINIC_NAME;
   const healthWorkerCi = process.env.HCEN_HEALTH_WORKER_CI;
   const basicUser = process.env.HCEN_BASIC_AUTH_USER || "admin";

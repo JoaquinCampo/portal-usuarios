@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const HCEN_BASE_URL = process.env.HCEN_API_BASE_URL ?? process.env.HCEN_API_URL ?? "http://localhost:8080";
+const HCEN_BASE_URL = process.env.HCEN_API_URL ?? process.env.HCEN_API_URL ?? "http://localhost:8080";
 const HCEN_BASIC_AUTH = process.env.HCEN_API_BASIC_AUTH ?? "admin:admin";
 
 function backendAuthHeader() {

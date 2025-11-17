@@ -13,12 +13,12 @@ export async function GET(request: Request) {
     );
   }
 
-  // Prefer explicit HCEN_API_BASE_URL if provided, else derive from HCEN_API_URL
+  // Prefer explicit HCEN_API_URL if provided, else derive from HCEN_API_URL
   const baseFromLegacy = process.env.HCEN_API_URL
     ? `${process.env.HCEN_API_URL.replace(/\/$/, "")}/api`
     : undefined;
   let baseUrl =
-    process.env.HCEN_API_BASE_URL || baseFromLegacy || "http://localhost:8080/api";
+    process.env.HCEN_API_URL || baseFromLegacy || "http://localhost:8080/api";
   // Normalize: strip trailing slash and ensure single /api segment
   baseUrl = baseUrl.replace(/\/$/, "");
   if (!baseUrl.endsWith("/api")) {
