@@ -1,13 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import type { ReactNode } from "react";
-import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AppHeader } from "@/app/_components/app-header";
 import { SignOutButton } from "@/app/_components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { AccessPolicyForms } from "./_components/access-policy-forms";
 import { readSession } from "@/lib/session";
-import { GUEST_CI_COOKIE_NAME, GUEST_PROFILE_COOKIE_NAME } from "@/lib/cookie-names";
 import {
   listClinicAccessPolicies,
   listHealthWorkerAccessPolicies,
@@ -18,7 +17,6 @@ import {
   type SpecialtyAccessPolicy,
 } from "@/lib/access-policies";
 import { formatHcenError } from "@/lib/hcen-connectivity";
-import { parseGuestProfileCookie } from "@/lib/guest-cookie";
 import {
   deleteClinicAccessPolicyAction,
   deleteHealthWorkerAccessPolicyAction,
@@ -50,9 +48,22 @@ function specialtyLabel(policy: SpecialtyAccessPolicy) {
   return policy.specialtyName || "Especialidad sin datos";
 }
 
+function sanitizeErrorForDisplay(message?: string, status?: number) {
+  if (!message) {
+    return status ? `No se pudieron cargar los datos (HTTP ${status}).` : "No se pudieron cargar los datos.";
+  }
+  const trimmed = message.trim();
+  if (!trimmed || trimmed.startsWith("<")) {
+    return status ? `No se pudieron cargar los datos (HTTP ${status}).` : "No se pudieron cargar los datos.";
+  }
+  const singleLine = trimmed.replace(/\s+/g, " ").slice(0, 200).trim();
+  return singleLine || (status ? `No se pudieron cargar los datos (HTTP ${status}).` : "No se pudieron cargar los datos.");
+}
+
 function formatAccessPolicyError(result?: Pick<ApiResult, "status" | "error">) {
-  if (!result) return "Error desconocido";
-  return formatHcenError(result.status, result.error);
+  if (!result) return "No se pudieron cargar los datos.";
+  const formatted = formatHcenError(result.status, result.error);
+  return sanitizeErrorForDisplay(formatted, result.status);
 }
 
 type SectionProps<T> = {
@@ -85,16 +96,12 @@ function PoliciesSection<T>({ title, emptyMessage, error, policies, renderItem }
 
 export default async function AccessPoliciesPage() {
   const session = await readSession();
-  const cookieStore = await cookies();
-  const guestCi = cookieStore.get(GUEST_CI_COOKIE_NAME)?.value;
-  const guestProfile = parseGuestProfileCookie(cookieStore.get(GUEST_PROFILE_COOKIE_NAME)?.value);
-  const ci =
-    session?.attributes?.numero_documento ??
-    session?.healthUser?.id ??
-    guestProfile?.ci ??
-    guestCi ??
-    null;
-  const email = session?.attributes?.email ?? guestProfile?.email ?? null;
+  if (!session) {
+    redirect("/login?redirectTo=/access-policies");
+  }
+
+  const ci = session.attributes?.numero_documento ?? session.healthUser?.id ?? null;
+  const email = session.attributes?.email ?? null;
 
   let clinicPolicies: ClinicAccessPolicy[] = [];
   let healthWorkerPolicies: HealthWorkerAccessPolicy[] = [];

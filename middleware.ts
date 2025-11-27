@@ -2,10 +2,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 const AUTH_COOKIE = "portal_session";
-const PUBLIC_PATHS = new Set(["/login"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/logout"]);
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   if (
     pathname.startsWith("/_next") ||
@@ -18,9 +18,8 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(AUTH_COOKIE);
 
   if (PUBLIC_PATHS.has(pathname)) {
-    if (sessionCookie) {
-      const redirectTo =
-        request.nextUrl.searchParams.get("redirectTo") ?? "/home";
+    if (sessionCookie && pathname === "/login") {
+      const redirectTo = request.nextUrl.searchParams.get("redirectTo") ?? "/home";
       const url = new URL(redirectTo, request.url);
       return NextResponse.redirect(url);
     }
@@ -28,8 +27,12 @@ export function middleware(request: NextRequest) {
   }
 
   if (!sessionCookie) {
-    // Allow access without session for guest users
-    return NextResponse.next();
+    const loginUrl = new URL("/login", request.url);
+    const target = `${pathname}${search}`;
+    if (target && target !== "/") {
+      loginUrl.searchParams.set("redirectTo", target);
+    }
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

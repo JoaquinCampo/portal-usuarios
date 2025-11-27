@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { AppHeader } from "@/app/_components/app-header";
 import { Card } from "@/components/ui/card";
 import { LoginButton } from "./login-button";
-import { CIForm } from "./ci-form";
 import { readSession } from "@/lib/session";
 
 interface LoginPageProps {
@@ -34,7 +33,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 Bienvenido al Portal de Usuarios
               </h2>
               <p className="text-sm text-muted-foreground">
-                Elige cómo quieres acceder a tus servicios de salud.
+                Accede con tu Identidad Digital de GUB.UY para sincronizar tus datos.
               </p>
             </div>
             {errorMessage ? (
@@ -44,26 +43,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             ) : null}
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  Acceso con Identidad Digital
-                </h3>
                 <LoginButton />
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    O
-                  </span>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-foreground mb-2">
-                  Acceso con Cédula
-                </h3>
-                <CIForm />
               </div>
             </div>
           </div>

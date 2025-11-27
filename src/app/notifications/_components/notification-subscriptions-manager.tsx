@@ -2,17 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { readGuestProfile } from "@/lib/guest-profile";
 
 type Status = "idle" | "loading" | "saving" | "success" | "error";
 type NotificationType = "ACCESS_REQUEST" | "CLINICAL_HISTORY_ACCESS";
 
 interface Props {
   sessionCi?: string | null;
-  isAuthenticated: boolean;
 }
 
-export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }: Props) {
+const GENERIC_FETCH_ERROR = "No se pudieron obtener las preferencias.";
+
+function buildFriendlyError(message: string | null | undefined, status?: number) {
+  if (!message) {
+    return status ? `${GENERIC_FETCH_ERROR} (HTTP ${status})` : GENERIC_FETCH_ERROR;
+  }
+  const trimmed = message.trim();
+  if (!trimmed || trimmed.startsWith("<")) {
+    return status ? `${GENERIC_FETCH_ERROR} (HTTP ${status})` : GENERIC_FETCH_ERROR;
+  }
+  const singleLine = trimmed.replace(/\s+/g, " ").slice(0, 160).trim();
+  return singleLine || GENERIC_FETCH_ERROR;
+}
+
+export function NotificationSubscriptionsManager({ sessionCi }: Props) {
   const [ci, setCi] = useState<string | null>(sessionCi ?? null);
   const [mounted, setMounted] = useState(false);
 
@@ -24,12 +36,7 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
 
   useEffect(() => {
     setMounted(true);
-    if (sessionCi) {
-      setCi(sessionCi);
-      return;
-    }
-    const profile = readGuestProfile();
-    if (profile?.ci) setCi(profile.ci);
+    setCi(sessionCi ?? null);
   }, [sessionCi]);
 
   useEffect(() => {
@@ -50,12 +57,14 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
           data = text;
         }
         if (!res.ok) {
-          let message = `HTTP ${res.status}`;
+          let message: string | undefined;
           if (data && typeof data === "object" && "error" in data) {
-            const errVal = (data as { error: unknown }).error;
+            const errVal = (data as { error?: unknown }).error;
             if (typeof errVal === "string") message = errVal;
+          } else if (typeof data === "string") {
+            message = data;
           }
-          throw new Error(message);
+          throw new Error(buildFriendlyError(message, res.status));
         }
         if (cancelled) return;
         if (data && typeof data === "object") {
@@ -71,7 +80,11 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
       } catch (e: unknown) {
         if (cancelled) return;
         setStatus("error");
-        setError(e instanceof Error ? e.message : "No se pudieron obtener las preferencias.");
+        if (e instanceof Error) {
+          setError(buildFriendlyError(e.message));
+        } else {
+          setError(GENERIC_FETCH_ERROR);
+        }
       }
     }
     fetchPrefs();
@@ -83,15 +96,11 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
   async function toggle(type: NotificationType, next: boolean) {
     if (!ci) {
       setStatus("error");
-      setError(
-        isAuthenticated
-          ? "No se pudo determinar tu CI desde la sesion. Reintenta iniciar sesion."
-          : "Valida tu CI en la pantalla de inicio para gestionar notificaciones.",
-      );
+      setError("No se pudo determinar tu CI desde la sesion. Reintenta iniciar sesion.");
       return;
     }
 
-  const endpoint = next ? "/api/notifications/subscribe" : "/api/notifications/unsubscribe";
+    const endpoint = next ? "/api/notifications/subscribe" : "/api/notifications/unsubscribe";
     const current = type === "ACCESS_REQUEST" ? accessReqEnabled : clinicalEnabled;
     // optimistic update
     if (type === "ACCESS_REQUEST") {
@@ -108,7 +117,7 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userCi: ci, notificationType: type }),
       });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      if (!resp.ok) throw new Error(`No se pudo actualizar la preferencia (HTTP ${resp.status})`);
       setStatus("success");
     } catch (e: unknown) {
       // rollback
@@ -118,7 +127,11 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
         setClinicalEnabled(current);
       }
       setStatus("error");
-      setError(e instanceof Error ? e.message : "No se pudo actualizar la preferencia.");
+      if (e instanceof Error) {
+        setError(buildFriendlyError(e.message));
+      } else {
+        setError("No se pudo actualizar la preferencia.");
+      }
     }
   }
 
@@ -167,9 +180,7 @@ export function NotificationSubscriptionsManager({ sessionCi, isAuthenticated }:
       ) : null}
       {!ci ? (
         <p className="text-xs text-muted-foreground">
-          {isAuthenticated
-            ? "No pudimos obtener tu CI desde la sesion. Reintenta iniciar sesion."
-            : "Valida tu CI desde la pantalla principal para habilitar esta opcion."}
+          No pudimos obtener tu CI desde la sesion. Reintenta iniciar sesion.
         </p>
       ) : null}
     </div>
