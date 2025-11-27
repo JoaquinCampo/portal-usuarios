@@ -154,10 +154,6 @@ export default async function AccessPoliciesPage() {
 
         {ci ? (
           <section className="space-y-4">
-            <header className="flex flex-col gap-1">
-              <p className="text-xs uppercase text-muted-foreground">CI consultada</p>
-              <p className="text-lg font-semibold">{ci}</p>
-            </header>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <PoliciesSection

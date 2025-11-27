@@ -143,7 +143,6 @@ export function NotificationSubscriptionsManager({ sessionCi }: Props) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">Notificaciones de solicitudes de acceso</p>
-            <p className="text-xs text-muted-foreground">Tipo: ACCESS_REQUEST</p>
           </div>
           <Button
             onClick={() => toggle("ACCESS_REQUEST", !accessReqEnabled)}
@@ -159,7 +158,6 @@ export function NotificationSubscriptionsManager({ sessionCi }: Props) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">Notificaciones de acceso a historia clínica</p>
-            <p className="text-xs text-muted-foreground">Tipo: CLINICAL_HISTORY_ACCESS</p>
           </div>
           <Button
             onClick={() => toggle("CLINICAL_HISTORY_ACCESS", !clinicalEnabled)}

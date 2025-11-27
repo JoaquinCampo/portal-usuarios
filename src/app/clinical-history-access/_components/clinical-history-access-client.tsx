@@ -128,24 +128,9 @@ export function ClinicalHistoryAccessClient({ ci }: ClinicalHistoryAccessClientP
           <HistoryIcon className="h-4 w-4" />
           <span className="text-sm">Accesos recientes a tu historia clínica</span>
         </div>
-        {activeCi ? (
-          <span className="text-xs">
-            CI activa: <span className="font-mono text-foreground">{activeCi}</span>
-          </span>
-        ) : (
+        {!activeCi ? (
           <span className="text-xs text-destructive">No se pudo determinar la CI desde la sesión.</span>
-        )}
-        {data?.healthUser && (
-          <div className="text-xs">
-            Paciente: <span className="text-foreground">{fullName || "(sin nombre)"}</span> — CI: {" "}
-            <span className="font-mono text-foreground">{data.healthUser.ci}</span>
-            {emailValue ? (
-              <span>
-                {" "}— Email: <span className="font-mono text-foreground">{emailValue}</span>
-              </span>
-            ) : null}
-          </div>
-        )}
+        ) : null}
         {loading && <span className="text-xs">Cargando…</span>}
         {error && <span className="text-xs text-destructive">{error}</span>}
       </div>

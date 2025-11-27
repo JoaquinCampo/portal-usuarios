@@ -120,6 +120,8 @@ export function ClinicalHistorySearch({ ci }: ClinicalHistorySearchProps) {
     };
   }, [hasAccess]);
 
+  const shouldShowAccessNotice = !error && hasAccess !== true && (hasAccess !== null || accessMessage);
+
   return (
     <div className="space-y-6">
       <div>
@@ -143,7 +145,7 @@ export function ClinicalHistorySearch({ ci }: ClinicalHistorySearchProps) {
 
       {loading ? <div className="text-sm text-muted-foreground">Cargando historial...</div> : null}
 
-      {!error && (hasAccess !== null || accessMessage) ? (
+      {shouldShowAccessNotice ? (
         <div className={`rounded-xl border px-4 py-3 text-sm ${accessVariant.styles}`}>
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="outline" className="border-current text-current">
@@ -234,7 +236,7 @@ export function ClinicalHistorySearch({ ci }: ClinicalHistorySearchProps) {
               ? hasAccess === false
                 ? "No tenés permisos vigentes para ver documentos."
                 : "No encontramos documentos asociados a tu historia clínica."
-              : "Necesitamos tu cédula para buscar tu historia clínica."}
+              : "Recuperando datos de tu historia clínica."}
           </div>
         )}
       </section>

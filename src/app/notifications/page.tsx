@@ -29,7 +29,7 @@ export default async function NotificationsPage() {
             <div>
               <h2 className="text-xl font-semibold text-foreground">Preferencias de notificaciones</h2>
               <p className="text-sm text-muted-foreground">
-                Administrá qué tipos de notificaciones querés recibir. No necesitás volver a ingresar tu CI.
+                Administrá qué tipos de notificaciones querés recibir.
               </p>
             </div>
             <NotificationSubscriptionsManager sessionCi={documentNumber} />
